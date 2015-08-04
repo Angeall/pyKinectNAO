@@ -7,6 +7,8 @@ avatar_package = "pykinectnao.avatars.implemented"
 # define the joints supported by your sensor in arguments of init
 joint_map = {}
 
+NO_DATA = -1
+
 
 class Sensor(object):
     def __init__(self, avatar_module_name, _map=joint_map):
@@ -66,7 +68,7 @@ class Sensor(object):
     #   and motors indication should be [..., [Yaw, Pitch, Roll], ...]
     #   and positions indication should be [..., [X, Y, Z], ...].
     #   The two lists should be converted, following the two dicts (motors, positions) of the targeted avatar.&
-    def get_movement(self):
+    def get_movement(self, nb_of_body=1):
         # Any descendant could wait for data here
         return self.convert_orientation(), self.convert_positions()
 
