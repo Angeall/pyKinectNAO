@@ -13,15 +13,16 @@ def run():
     global bodies
     if kinect.has_new_body_frame():
         bodies = kinect.get_last_body_frame()
-    for i in range(0, kinect.max_body_count):
-        if bodies is not None:
+    if bodies is not None:
+        for i in range(0, kinect.max_body_count):
             body = bodies.bodies[i]
             if not body.is_tracked:
                 continue
             joints = body.joints
             # convert joint coordinates to color space
             orientation = body.joint_orientations[PyKinectV2.JointType_ElbowRight].Orientation
-            #print joints[PyKinectV2.JointType_Head].Position.x, joints[PyKinectV2.JointType_Head].Position.y, joints[PyKinectV2.JointType_Head].Position.z
+            print i
+            print joints[PyKinectV2.JointType_Head].Position.x, joints[PyKinectV2.JointType_Head].Position.y, joints[PyKinectV2.JointType_Head].Position.z
             print orientation.x, orientation.y, orientation.z, orientation.w
 
 run()

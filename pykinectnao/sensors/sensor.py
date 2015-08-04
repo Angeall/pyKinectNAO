@@ -3,17 +3,13 @@ import importlib
 import pykinectnao.avatars.joints as joints
 avatar_package = "pykinectnao.avatars.implemented"
 
-# In order to use the predefined functionsn you need to define the joints supported by your sensor
-joint_map = {joints.HEAD : 0,
-             joints.SPINE_BASE : 1,
-             joints.NECK : 2}
-
-positions = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
+# In order to use the predefined functions you need to
+# define the joints supported by your sensor in arguments of init
+joint_map = {}
 
 
 class Sensor(object):
-    def __init__(self, avatar_module_name):
+    def __init__(self, avatar_module_name, _map=joint_map):
         # The avatar_module_name is used to import the motors and the positions needed by the avatar
         assert type(avatar_module_name) == str
         self.avatar_module = importlib.import_module(avatar_package+".%s" % avatar_module_name)
@@ -22,7 +18,7 @@ class Sensor(object):
         self.avatar_positions_needed = self.avatar_module.positions_needed
 
         # Don't forget to link your map with the object, so the methods can reach it
-        self.joint_map = joint_map
+        self.joint_map = _map
 
         # Lists prepared to gain performance
         self.orientation_pattern_list = []
@@ -71,11 +67,13 @@ class Sensor(object):
     #   and positions indication should be [..., [X, Y, Z], ...].
     #   The two lists should be converted, following the two dicts (motors, positions) of the targeted avatar.&
     def get_movement(self):
+        # Any descendant could wait for data here
         return self.convert_orientation(), self.convert_positions()
 
     # Be sure to have the proper joint_map linked with self.joint_map
     # Be sure to have a non-empty list of positions
     # This method match the sensor joint_map with the avatar position_needed map
+    # Override if needed
     def convert_positions(self):
         if len(self.positions) == 0:
             return []
@@ -87,6 +85,7 @@ class Sensor(object):
     # Be sure to have the proper joint_map linked with self.joint_map
     # Be sure to have a non-empty list of orientations
     # This method match the sensor joint_map with the avatar motors_needed map
+    # Override if needed
     def convert_orientation(self):
         if len(self.orientations) == 0:
             return []
@@ -94,3 +93,9 @@ class Sensor(object):
         for index in self.orientations_conversion_map.keys():
             orientations[self.orientations_conversion_map[index][0]] = self.orientations[index]
         return orientations
+
+    # Any descendant should override this method with the right method
+    #   e.g. the Kinect 2 waits for a body to show up and wait again if it loses a body
+    def wait_for_data(self, wait_message="Waiting for the sensor to get data..."):
+        print wait_message
+        pass
