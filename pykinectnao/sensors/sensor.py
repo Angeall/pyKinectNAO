@@ -31,9 +31,9 @@ class Sensor(object):
         # Device should be the connection to your sensor
         self.device = None
         # Orientations should contain the joints orientation (list of [Yaw, Pitch, Roll] in degrees)
-        self.orientations = []
+        self.orientations = None
         # Positions should contain the joints orientation (list of [X, Y, Z])
-        self.positions = []
+        self.positions = None
 
     def build_patterns(self):
         max_index = -1
@@ -75,7 +75,7 @@ class Sensor(object):
     # This method match the sensor joint_map with the avatar position_needed map
     # Override if needed
     def convert_positions(self):
-        if len(self.positions) == 0:
+        if self.positions is None:
             return []
         positions = self.position_pattern_list[:]
         for index in self.positions_conversion_map.keys():
@@ -87,7 +87,7 @@ class Sensor(object):
     # This method match the sensor joint_map with the avatar motors_needed map
     # Override if needed
     def convert_orientation(self):
-        if len(self.orientations) == 0:
+        if self.orientations is None:
             return []
         orientations = self.orientation_pattern_list[:]
         for index in self.orientations_conversion_map.keys():

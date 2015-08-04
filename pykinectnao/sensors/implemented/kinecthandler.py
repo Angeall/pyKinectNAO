@@ -67,7 +67,7 @@ class KinectHandler(Sensor):
     # This method match the sensor joint_map with the avatar position_needed map
     # Override if needed
     def convert_positions(self):
-        if len(self.positions) == 0:
+        if self.positions is None:
             return []
         positions = self.position_pattern_list[:]
         for index in self.positions_conversion_map.keys():
@@ -81,7 +81,7 @@ class KinectHandler(Sensor):
     # This method match the sensor joint_map with the avatar motors_needed map
     # Override if needed
     def convert_orientation(self):
-        if len(self.orientations) == 0:
+        if self.orientations is None:
             return []
         orientations = self.orientation_pattern_list[:]
         for index in self.orientations_conversion_map.keys():
