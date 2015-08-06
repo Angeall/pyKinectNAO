@@ -41,7 +41,7 @@ class KinectHandler(Sensor):
         self.active_bodies_indices = []
 
     def close(self):
-        self.kinect.close()
+        self.device.close()
 
     def get_movement(self, nb_of_body=1):
         if self.device.has_new_body_frame():
@@ -63,10 +63,6 @@ class KinectHandler(Sensor):
             res = []
             for j in range(nb_of_body):
                 body = self.bodies.bodies[self.active_bodies_indices[j]]
-                joints = body.joints
-                orientation = body.joint_orientations[PyKinectV2.JointType_ElbowRight].Orientation
-                print joints[PyKinectV2.JointType_Head].Position.x, joints[PyKinectV2.JointType_Head].Position.y, joints[PyKinectV2.JointType_Head].Position.z
-                print orientation.x, orientation.y, orientation.z, orientation.w
                 self.positions = body.joints
                 self.orientations = body.joint_orientations
                 res.append((self.convert_orientation(), self.convert_positions()))
@@ -97,17 +93,30 @@ class KinectHandler(Sensor):
             return []
         orientations = self.orientation_pattern_list[:]
         for index in self.orientations_conversion_map.keys():
+            tab = [None, None, None]
             # If it can yaw
             if self.orientations_conversion_map[index][1][0]:
-                self.orientations[index][0] = self.compute_yaw(index)
+                tab[0] = self.compute_yaw(index)
             # If it can pitch
             if self.orientations_conversion_map[index][1][1]:
-                self.orientations[index][1] = self.compute_pitch(index)
+                tab[1] = self.compute_pitch(index)
             # If it can roll
             if self.orientations_conversion_map[index][1][2]:
-                self.orientations[index][2] = self.compute_roll(index)
-            orientations[self.orientations_conversion_map[index][0]] = self.orientations[index]
+                tab[2] = self.compute_roll(index)
+            orientations[self.orientations_conversion_map[index][0]] = tab
         return orientations
+    # def convert_orientation(self):
+    #     if self.orientations is None:
+    #         return []
+    #     orientations = self.orientation_pattern_list[:]
+    #     for index in self.orientations_conversion_map.keys():
+    #         quaternion = (self.orientations[index].Orientation.w,
+    #                       self.orientations[index].Orientation.x,
+    #                       self.orientations[index].Orientation.y,
+    #                       self.orientations[index].Orientation.z)
+    #         orientations[self.orientations_conversion_map[index][0]] = \
+    #             pykinectnao.transformations.euler_from_quaternion(quaternion)
+    #     return orientations
 
     def compute_yaw(self, index):
         x = self.orientations[index].Orientation.x
@@ -122,7 +131,7 @@ class KinectHandler(Sensor):
         y = self.orientations[index].Orientation.y
         z = self.orientations[index].Orientation.z
         w = self.orientations[index].Orientation.w
-        pitch = atan2(2 * ((y * z) + (w * x)), (w * w) - (x * x) - (y * y) + (z * z)) / pi * 180.0
+        pitch = atan2(2 * ((y * z) + (w * x)), 1-2*((x*x) + (y*y))) / pi * 180.0
         return pitch
 
     def compute_roll(self, index):
@@ -130,6 +139,6 @@ class KinectHandler(Sensor):
         y = self.orientations[index].Orientation.y
         z = self.orientations[index].Orientation.z
         w = self.orientations[index].Orientation.w
-        roll = atan2(2 * ((x * y) + (w * z)), (w * w) + (x * x) - (y * y) - (z * z)) / pi * 180.0
+        roll = atan2(2 * ((x * y) + (w * z)), 1-2*((y*y)+(z*z))) / pi * 180.0
         return roll
 

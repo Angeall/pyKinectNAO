@@ -2,21 +2,25 @@ __author__ = 'Angeall'
 
 import pykinectnao.avatars.joints as joints
 from pykinectnao.avatars.avatar import Avatar
+import argparse
+import math
+import motion
+from naoqi import ALProxy
 
 # Follows the avatar needs : joints.(...): (index, [Yaw, Pitch, Roll])
-motors_needed = {joints.HEAD: (0, [True, True, False]), }
-                 # joints.SHOULDER_RIGHT: (1, [False, True, True]),
-                 # joints.ELBOW_RIGHT: (2, [True, False, True]),
-                 # joints.HAND_RIGHT: (3, [True, False, False]),
-                 # joints.SHOULDER_LEFT: (4, [False, True, True]),
-                 # joints.ELBOW_LEFT: (5, [True, False, True]),
-                 # joints.HAND_LEFT: (6, [True, False, False]),
-                 # joints.HIP_RIGHT: (7, [True, True, True]),
-                 # joints.KNEE_RIGHT: (8, [False, True, False]),
-                 # joints.FOOT_RIGHT: (9, [False, True, True]),
-                 # joints.HIP_LEFT: (10, [True, True, True]),
-                 # joints.KNEE_LEFT: (11, [False, True, False]),
-                 # joints.FOOT_LEFT: (12, [False, True, True])}
+motors_needed = {  # joints.SHOULDER_RIGHT: (0, [False, True, True]),}
+                   # Iinitially ELBOW_RIGHT
+                   joints.ELBOW_LEFT: (0, [True, True, True]), }
+# joints.HAND_RIGHT: (2, [True, False, False]),
+# joints.SHOULDER_LEFT: (3, [False, True, True]),
+# joints.ELBOW_LEFT: (4, [True, False, True]),
+# joints.HAND_LEFT: (5, [True, False, False]),
+# joints.HIP_RIGHT: (6, [True, True, True]),
+# joints.KNEE_RIGHT: (7, [False, True, False]),
+# joints.FOOT_RIGHT: (8, [False, True, True]),
+# joints.HIP_LEFT: (9, [True, True, True]),
+# joints.KNEE_LEFT: (10, [False, True, False]),
+# joints.FOOT_LEFT: (11, [False, True, True])}
 
 # For the movement, we need two positions: one around the hip center, one around the neck
 #   these two positions will allow to make sure the person in front of the camera as moved his whole body
@@ -26,11 +30,63 @@ positions_needed = {joints.NECK: 0,
 
 
 class NAOCommander(Avatar):
-    def __init__(self, robotIP):
+    def __init__(self, robotIP, PORT):
         super(NAOCommander, self).__init__()
-        # TODO : Proxy connection to NAO
-        self.device = None
+        motionproxy = ALProxy("ALMotion", robotIP, PORT)
+        postureproxy = ALProxy("ALRobotPosture", robotIP, PORT)
+        # Wake up robot
+        motionproxy.wakeUp()
+
+        self.device = motionproxy
+        self.postureProxy = postureproxy
 
     # TODO move with motors and positions
     # def move(self):
 
+    def user_left_arm_articular(self, shoulder_pitch=87, shoulder_roll=0, elbow_yaw=-70,
+                                elbow_roll=-34, wrist_yaw=0., hand=0.28, pfractionmaxspeed=0.6):
+        # Arms motion from user have always the priority than walk arms motion
+        jointnames = ["LShoulderPitch", "LShoulderRoll", "LElbowYaw", "LElbowRoll", "LWristYaw", "LHand"]
+        arm1 = [shoulder_pitch, shoulder_roll, elbow_yaw, elbow_roll, wrist_yaw]
+        arm1 = [x * motion.TO_RAD for x in arm1]
+        # The hand is not in degree, we need to add it after the conversion
+        arm1.append(hand)
+
+        self.device.angleInterpolationWithSpeed(jointnames, arm1, pfractionmaxspeed)
+
+    def wave_your_left_hand(self):
+        # Arms motion from user have always the priority than walk arms motion
+        jointnames = ["LShoulderPitch", "LShoulderRoll", "LElbowYaw", "LElbowRoll", "LHand"]
+        arm1 = [-90, 55, -6, -3.]
+        arm1 = [x * motion.TO_RAD for x in arm1]
+        # The hand is not in degree, we need to add it after the conversion
+        arm1.append(0.98)
+
+        arm2 = [-90, 55, -6, -85.]
+        arm2 = [x * motion.TO_RAD for x in arm2]
+        # The hand is not in degree, we need to add it after the conversion
+        arm2.append(0.98)
+
+        arm0 = [87, 0, -70, -34.]
+        arm0 = [x * motion.TO_RAD for x in arm0]
+        # The hand is not in degree, we need to add it after the conversion
+        arm0.append(0.28)
+
+        pfractionmaxspeed = 0.6
+
+        self.device.angleInterpolationWithSpeed(jointnames, arm1, pfractionmaxspeed)
+        self.device.angleInterpolationWithSpeed(jointnames, arm2, pfractionmaxspeed)
+        self.device.angleInterpolationWithSpeed(jointnames, arm1, pfractionmaxspeed)
+        self.device.angleInterpolationWithSpeed(jointnames, arm2, pfractionmaxspeed)
+        self.device.angleInterpolationWithSpeed(jointnames, arm0, pfractionmaxspeed)
+
+    def user_right_arm_articular(self, shoulder_pitch=87, shoulder_roll=0, elbow_yaw=70,
+                                 elbow_roll=34, wrist_yaw=0., hand=0.28, pfractionmaxspeed=0.6):
+        # Arms motion from user have always the priority than walk arms motion
+        jointnames = ["RShoulderPitch", "RShoulderRoll", "RElbowYaw", "RElbowRoll", "RWristYaw", "RHand"]
+        arm1 = [shoulder_pitch, shoulder_roll, elbow_yaw, elbow_roll, wrist_yaw]
+        arm1 = [x * motion.TO_RAD for x in arm1]
+        # The hand is not in degree, we need to add it after the conversion
+        arm1.append(hand)
+
+        self.device.angleInterpolationWithSpeed(jointnames, arm1, pfractionmaxspeed)
