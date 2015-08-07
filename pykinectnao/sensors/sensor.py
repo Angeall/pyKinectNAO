@@ -64,7 +64,7 @@ class Sensor(object):
                 self.orientations_conversion_map[self.joint_map[key]] = self.avatar_motors_needed[key]
 
     # Any descendant should have this method implemented.
-    #   It should return a tuple formatted like this : ([motors indication], [positions indication])
+    #   It should return a tuple formatted like this: ([motors indication in degree [-180, 180]],[positions indication])
     #   and motors indication should be [..., [Yaw, Pitch, Roll], ...]
     #   and positions indication should be [..., [X, Y, Z], ...].
     #   The two lists should be converted, following the two dicts (motors, positions) of the targeted avatar.&

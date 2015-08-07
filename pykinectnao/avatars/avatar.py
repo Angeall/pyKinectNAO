@@ -15,9 +15,17 @@ motors_needed = {}
 #   => you should check if the index in your list is not None
 positions_needed = {}
 
+# The syntax for this dict is the followinf :
+#   {name_of_the_sensor_module: {joints_constant: [(YawRatio, Phi, YawAxis), same for Pitch, same for Roll]}}
+#   where Yaw,Roll,PitchRatio is a ratio to multiply with the real value. (to adjust the motors values)
+#   where Yaw,Rol, PitchPhi is the phase shift in degree of the axis to convert the sensor value to the avatar value
+#   where Yaw,Roll,PitchAxis is "+" if the sensor axis is oriented the same way than the avatar, "-" otherwise
+# See an example in "naocommander.py"
+motors_converter = {}
+
 
 class Avatar(object):
-    def __init__(self):
+    def __init__(self, motors_converters=motors_converter):
         # device should be the connection to your robot
         self.device = None
         # motors should be the motors commands you asked from the camera
@@ -25,3 +33,5 @@ class Avatar(object):
         self.motors = None
         # positions should be the positions list you asked from the camera
         self.positions = None
+        # if we need converters camera->avatar for the [Yaw, Pitch, Roll], then you put it here
+        self.motors_converters = motors_converters

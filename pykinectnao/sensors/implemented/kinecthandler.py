@@ -93,6 +93,7 @@ class KinectHandler(Sensor):
             return []
         orientations = self.orientation_pattern_list[:]
         for index in self.orientations_conversion_map.keys():
+
             tab = [None, None, None]
             # If it can yaw
             if self.orientations_conversion_map[index][1][0]:
@@ -105,18 +106,6 @@ class KinectHandler(Sensor):
                 tab[2] = self.compute_roll(index)
             orientations[self.orientations_conversion_map[index][0]] = tab
         return orientations
-    # def convert_orientation(self):
-    #     if self.orientations is None:
-    #         return []
-    #     orientations = self.orientation_pattern_list[:]
-    #     for index in self.orientations_conversion_map.keys():
-    #         quaternion = (self.orientations[index].Orientation.w,
-    #                       self.orientations[index].Orientation.x,
-    #                       self.orientations[index].Orientation.y,
-    #                       self.orientations[index].Orientation.z)
-    #         orientations[self.orientations_conversion_map[index][0]] = \
-    #             pykinectnao.transformations.euler_from_quaternion(quaternion)
-    #     return orientations
 
     def compute_yaw(self, index):
         x = self.orientations[index].Orientation.x
@@ -142,3 +131,26 @@ class KinectHandler(Sensor):
         roll = atan2(2 * ((x * y) + (w * z)), 1-2*((y*y)+(z*z))) / pi * 180.0
         return roll
 
+    # def compute_yaw(self, index):
+    #     x = self.orientations[index].Orientation.x
+    #     y = self.orientations[index].Orientation.y
+    #     z = self.orientations[index].Orientation.z
+    #     w = self.orientations[index].Orientation.w
+    #     yaw = asin(2 * ((w * x) + (y * z))) / pi * 180.0
+    #     return yaw
+    #
+    # def compute_pitch(self, index):
+    #     x = self.orientations[index].Orientation.x
+    #     y = self.orientations[index].Orientation.y
+    #     z = self.orientations[index].Orientation.z
+    #     w = self.orientations[index].Orientation.w
+    #     pitch = atan2(2 * ((w * z) - (x * y)), 1-2*((w*w) + (y*y))) / pi * 180.0
+    #     return pitch
+    #
+    # def compute_roll(self, index):
+    #     x = self.orientations[index].Orientation.x
+    #     y = self.orientations[index].Orientation.y
+    #     z = self.orientations[index].Orientation.z
+    #     w = self.orientations[index].Orientation.w
+    #     roll = atan2(2 * ((x * z) - (w * y)), 1-2*((x*x)+(y*y))) / pi * 180.0
+    #     return roll
