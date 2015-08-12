@@ -35,7 +35,7 @@ positions_needed = {joints.NECK: 0,
 #   where Yaw,Rol, PitchYPhi is the phase shift in degree of the y axis to convert the sensor value to the avatar value
 #   where Yaw,Roll,PitchAxis is "+" if the sensor axis is oriented the same way than the avatar, "-" otherwise
 motors_converters = {"kinecthandler":
-                        {joints.ELBOW_RIGHT: [(1., 0, "+", "+"), (1.1, +90, "+", "-"), (0.8, 4, "+", "+")]}}
+                        {joints.ELBOW_RIGHT: [(0.2, 0, "+", "+"), (1., 0, "+", "+"), (1.1, +90, "+", "-")]}}
 
 
 class NAOCommander(Avatar):
