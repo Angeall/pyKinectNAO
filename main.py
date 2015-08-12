@@ -84,7 +84,11 @@ def convert_motors(results, device, sensor, avatar, must_filter=True):
         for joint in motors_needed.keys():
             if joint in convert_tab.keys():
                 tab = results[0][motors_needed[joint][0]]
+<<<<<<< Updated upstream
                 if joint in last_movements.keys() and len(last_movements[joint]) != 0:
+=======
+                if len(last_movements) != 0:
+>>>>>>> Stashed changes
                     # if joint not tracked properly
                     if device.positions[joint].TrackingState == PyKinectV2.TrackingState_NotTracked or \
                                     device.positions[joint].TrackingState == PyKinectV2.TrackingState_Inferred:
@@ -132,6 +136,7 @@ def kinect_value_test(kinect_h):
         # print utils.cart_to_spher([x, y, z])
         #for i in range(nb_of_body):
             # print "Body no", i
+<<<<<<< Updated upstream
             #print res[i][0]
             #convert_motors(res[i], kinect_h, "kinecthandler", "naocommander", must_filter=False)
             #print "==> ", res[i][0]
@@ -153,6 +158,28 @@ def kinect_value_test(kinect_h):
             sleep(3)
         if j == 25:
             print "-" * 10, "BRAS OBLIQUE HAUT LATERAL", "-" * 10
+=======
+            print res[i][0]
+            convert_motors(res[i], kinect_h, "kinecthandler", "naocommander", must_filter=False)
+            print "==> ", res[i][0]
+            # sleep(0.5)
+        if j % 5 == 0:
+            if j == 0:
+                print "-" * 10, "BRAS LE LONG DU CORPS", "-" * 10
+            if j == 5:
+                print "-" * 10, "BRAS EN L'AIR", "-" * 10
+            if j == 10:
+                print "-" * 10, "BRAS HORIZONTAL DEVANT", "-" * 10
+            if j == 15:
+                print "-" * 10, "BRAS HORIZONTAL LATERAL", "-" * 10
+            if j == 20:
+                print "-" * 10, "BRAS OBLIQUE BAS LATERAL", "-" * 10
+            if j == 25:
+                print "-" * 10, "BRAS OBLIQUE HAUT LATERAL", "-" * 10
+            if j == 30:
+                kinect_h.device.close()
+                break
+>>>>>>> Stashed changes
             sleep(3)
         if j == 30:
             kinect_h.device.close()
@@ -170,9 +197,15 @@ def nao_test(nao_c):
 
 
 def main(sensor="kinecthandler", avatar="naocommander"):
+<<<<<<< Updated upstream
     _sensor = objects[sensor]()
     # _avatar = objects[avatar](robotIP, PORT)
     # kinect_test(_sensor, _avatar)
+=======
+    _sensor = objects[sensor](avatar)
+    #_avatar = objects[avatar](robotIP, PORT)
+    #kinect_test(_sensor, _avatar)
+>>>>>>> Stashed changes
     kinect_value_test(_sensor)
 
 
