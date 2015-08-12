@@ -1,9 +1,6 @@
 __author__ = 'Angeall'
 
-import pykinectnao.avatars.joints as joints
-from pykinectnao.avatars.avatar import Avatar
-import argparse
-import math
+import joints
 import motion
 from naoqi import ALProxy
 
@@ -38,9 +35,8 @@ motors_converters = {"kinecthandler":
                         {joints.ELBOW_RIGHT: [(0.2, 0, "+", "+"), (1., 0, "+", "+"), (1.1, +90, "+", "-")]}}
 
 
-class NAOCommander(Avatar):
+class NAOCommander():
     def __init__(self, robotIP, PORT):
-        super(NAOCommander, self).__init__(motors_converters)
         motionproxy = ALProxy("ALMotion", robotIP, PORT)
         postureproxy = ALProxy("ALRobotPosture", robotIP, PORT)
         # Wake up robot

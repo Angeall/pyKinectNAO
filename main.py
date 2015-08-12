@@ -1,12 +1,14 @@
 __author__ = 'Angeall'
-import pykinectnao.sensors.implemented.kinecthandler as kinecthandler
-import pykinectnao.avatars.implemented.naocommander as naocommander
-from pykinect2 import PyKinectV2
 from time import sleep
 import cmath
-import pykinectnao.sensors.sensor as sensor
-import pykinectnao.filters
 from collections import deque
+
+from pykinect2 import PyKinectV2
+
+import pykinectnao.kinecthandler as kinecthandler
+import pykinectnao.naocommander as naocommander
+import pykinectnao.utils as utils
+import cmath
 
 robotIP = "192.168.2.24"
 PORT = 9559
@@ -34,7 +36,7 @@ def kinect_test(kinect_h, nao_c):
     j = 0
     while True:
         res = kinect_h.get_movement(nb_of_body)
-        if res == sensor.NO_DATA:
+        if res == kinecthandler.NO_DATA:
             continue
         for i in range(nb_of_body):
             res[i] = convert_motors(res[i], kinect_h, "kinecthandler", "naocommander")
@@ -107,7 +109,7 @@ def convert_motors(results, device, sensor, avatar, must_filter=True):
                             if len(smoothing_dict[joint][i]) == FILTER_SIZE:
                                 smoothing_dict[joint][i].popleft()
                             smoothing_dict[joint][i].append(tab[i])
-                            tab[i] = pykinectnao.filters.holt_winters_second_order_ewma \
+                            tab[i] = utils.holt_winters_second_order_ewma \
                                 (smoothing_dict[joint][i], FILTER_SPAN, FILTER_BETA)[-1]
                 last_movements[joint] = tab
     return results
@@ -117,31 +119,44 @@ def kinect_value_test(kinect_h):
     j = 0
     while True:
         res = kinect_h.get_movement(nb_of_body)
-        if res == sensor.NO_DATA:
+        if res == kinecthandler.NO_DATA:
             continue
+        print res[0][11]
+
+        x = res[0][11][1]
+        y = res[0][11][2]
+        z = res[0][11][3]
+        yz = complex(y, z)
+        xy = complex(x, y)
+        print "Roll: ", cmath.phase(xy)*180.0/cmath.pi, " - Pitch: ", cmath.phase(yz)*180.0/cmath.pi
+        # print utils.cart_to_spher([x, y, z])
         #for i in range(nb_of_body):
             # print "Body no", i
             #print res[i][0]
             #convert_motors(res[i], kinect_h, "kinecthandler", "naocommander", must_filter=False)
             #print "==> ", res[i][0]
             # sleep(0.5)
-        if j % 5 == 0:
-            if j == 0:
-                print "-" * 10, "BRAS LE LONG DU CORPS", "-" * 10
-            if j == 5:
-                print "-" * 10, "BRAS EN L'AIR", "-" * 10
-            if j == 10:
-                print "-" * 10, "BRAS HORIZONTAL DEVANT", "-" * 10
-            if j == 15:
-                print "-" * 10, "BRAS HORIZONTAL LATERAL", "-" * 10
-            if j == 20:
-                print "-" * 10, "BRAS OBLIQUE BAS LATERAL", "-" * 10
-            if j == 25:
-                print "-" * 10, "BRAS OBLIQUE HAUT LATERAL", "-" * 10
-            if j == 30:
-                kinect_h.device.close()
-                break
+        if j == 0:
+            print "-" * 10, "BRAS LE LONG DU CORPS", "-" * 10
             sleep(3)
+        if j == 5:
+            print "-" * 10, "BRAS EN L'AIR", "-" * 10
+            sleep(3)
+        if j == 10:
+            print "-" * 10, "BRAS HORIZONTAL DEVANT", "-" * 10
+            sleep(3)
+        if j == 15:
+            print "-" * 10, "BRAS HORIZONTAL LATERAL", "-" * 10
+            sleep(3)
+        if j == 20:
+            print "-" * 10, "BRAS OBLIQUE BAS LATERAL", "-" * 10
+            sleep(3)
+        if j == 25:
+            print "-" * 10, "BRAS OBLIQUE HAUT LATERAL", "-" * 10
+            sleep(3)
+        if j == 30:
+            kinect_h.device.close()
+            break
         else:
             sleep(1)
         j += 1
@@ -155,7 +170,7 @@ def nao_test(nao_c):
 
 
 def main(sensor="kinecthandler", avatar="naocommander"):
-    _sensor = objects[sensor](avatar)
+    _sensor = objects[sensor]()
     # _avatar = objects[avatar](robotIP, PORT)
     # kinect_test(_sensor, _avatar)
     kinect_value_test(_sensor)
