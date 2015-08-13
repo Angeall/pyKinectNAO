@@ -48,16 +48,13 @@ class NAOCommander():
     # TODO move with motors and positions
     # def move(self):
 
-    def user_left_arm_articular(self, shoulder_pitch=87, shoulder_roll=0, elbow_yaw=-70,
-                                elbow_roll=-34, wrist_yaw=0., hand=0.28, pfractionmaxspeed=0.6):
-        # Arms motion from user have always the priority than walk arms motion
-        jointnames = ["LShoulderPitch", "LShoulderRoll", "LElbowYaw", "LElbowRoll", "LWristYaw", "LHand"]
-        arm1 = [shoulder_pitch, shoulder_roll, elbow_yaw, elbow_roll, wrist_yaw]
-        arm1 = [x * motion.TO_RAD for x in arm1]
-        # The hand is not in degree, we need to add it after the conversion
-        arm1.append(hand)
 
-        self.device.angleInterpolationWithSpeed(jointnames, arm1, pfractionmaxspeed)
+
+    def go_to_zero(self):
+        self.postureProxy.goToPosture("Stand", 0.5)
+        self.user_right_arm_articular()
+        self.user_left_arm_articular()
+
 
     def wave_your_left_hand(self):
         # Arms motion from user have always the priority than walk arms motion
@@ -85,8 +82,8 @@ class NAOCommander():
         self.device.angleInterpolationWithSpeed(jointnames, arm2, pfractionmaxspeed)
         self.device.angleInterpolationWithSpeed(jointnames, arm0, pfractionmaxspeed)
 
-    def user_right_arm_articular(self, shoulder_pitch=87, shoulder_roll=0, elbow_yaw=70,
-                                 elbow_roll=34, wrist_yaw=0., hand=0.28, pfractionmaxspeed=0.6):
+    def user_right_arm_articular(self, shoulder_pitch=80.5, shoulder_roll=-6.5, elbow_yaw=80,
+                                 elbow_roll=2.5, wrist_yaw=0., hand=0.25, pfractionmaxspeed=0.6):
         if shoulder_pitch > 115:
             shoulder_pitch = 115
         if shoulder_pitch < -117:
@@ -98,6 +95,17 @@ class NAOCommander():
 
         # Arms motion from user have always the priority than walk arms motion
         jointnames = ["RShoulderPitch", "RShoulderRoll", "RElbowYaw", "RElbowRoll", "RWristYaw", "RHand"]
+        arm1 = [shoulder_pitch, shoulder_roll, elbow_yaw, elbow_roll, wrist_yaw]
+        arm1 = [x * motion.TO_RAD for x in arm1]
+        # The hand is not in degree, we need to add it after the conversion
+        arm1.append(hand)
+
+        self.device.angleInterpolationWithSpeed(jointnames, arm1, pfractionmaxspeed)
+
+    def user_left_arm_articular(self, shoulder_pitch=80, shoulder_roll=6.5, elbow_yaw=-80,
+                                    elbow_roll=-3.7, wrist_yaw=0., hand=0.25, pfractionmaxspeed=0.6):
+        # Arms motion from user have always the priority than walk arms motion
+        jointnames = ["LShoulderPitch", "LShoulderRoll", "LElbowYaw", "LElbowRoll", "LWristYaw", "LHand"]
         arm1 = [shoulder_pitch, shoulder_roll, elbow_yaw, elbow_roll, wrist_yaw]
         arm1 = [x * motion.TO_RAD for x in arm1]
         # The hand is not in degree, we need to add it after the conversion

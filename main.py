@@ -31,6 +31,7 @@ objects = {"kinecthandler": kinecthandler.KinectHandler,
 
 
 def kinect_test(kinect_h, nao_c):
+    first = True
     for joint in naocommander.motors_needed.keys():
         smoothing_dict[joint] = [deque(), deque(), deque()]
         last_movements[joint] = []
@@ -38,12 +39,18 @@ def kinect_test(kinect_h, nao_c):
     while True:
         res = kinect_h.get_movement(nb_of_body)
         if res == kinecthandler.NO_DATA:
+            first = True
             continue
+        if first == True:
+            first = False
+            sleep(5)
+            nao_c.go_to_zero()
         for i in range(nb_of_body):
-            res[i] = convert_motors(res[i], kinect_h, "kinecthandler", "naocommander")
-
-            nao_c.user_right_arm_articular(shoulder_pitch=res[i][0][0][1], shoulder_roll=res[i][0][0][2],
-                                           pfractionmaxspeed=0.7)
+            # res[i] = convert_motors(res[i], kinect_h, "kinecthandler", "naocommander")
+            #
+            # nao_c.user_right_arm_articular(shoulder_pitch=res[i][0][0][1], shoulder_roll=res[i][0][0][2],
+            #                                pfractionmaxspeed=0.7)
+            print res[i][0][kinecthandler.joints_map[joints.ELBOW_RIGHT]]
 
             # print res[i]
             # sleep(0.035)
@@ -157,6 +164,7 @@ def nao_test(nao_c):
     while i < 1:
         nao_c.waveYourLeftHand()
         i += 1
+    # TODO : test nao's positions
 
 
 def convert_shoulder_right(rot):
