@@ -28,11 +28,11 @@ positions_needed = {joints.NECK: 0,
 # The syntax for this dict is the followinf :
 #   {name_of_the_sensor_module: {joints_constant: [(YawRatio, YawXPhi, YawYPhi, YawAxis), same for Pitch and Roll]}}
 #   where Yaw,Roll,PitchRatio is a ratio to multiply with the real value. (to adjust the motors values)
-#   where Yaw,Rol, PitchXPhi is the phase shift in degree of the x axis to convert the sensor value to the avatar value
-#   where Yaw,Rol, PitchYPhi is the phase shift in degree of the y axis to convert the sensor value to the avatar value
+#   where Yaw,Roll, PitchXPhi is the phase shift in degree of the x axis to convert the sensor value to the avatar value
+#   where Yaw,Roll, PitchYPhi is the phase shift in degree of the y axis to convert the sensor value to the avatar value
 #   where Yaw,Roll,PitchAxis is "+" if the sensor axis is oriented the same way than the avatar, "-" otherwise
 motors_converters = {"kinecthandler":
-                        {joints.ELBOW_RIGHT: [(0.2, 0, "+", "+"), (1., 0, "+", "+"), (1.1, +90, "+", "-")]}}
+                        {joints.ELBOW_RIGHT: [(1, 0, "+", "+"), (1., +90, "+", "-"), (1., +0, "+", "+")]}}
 
 
 class NAOCommander():
