@@ -104,6 +104,15 @@ class NAOCommander():
 
     def user_left_arm_articular(self, shoulder_pitch=80, shoulder_roll=6.5, elbow_yaw=-80,
                                     elbow_roll=-3.7, wrist_yaw=0., hand=0.25, pfractionmaxspeed=0.6):
+        if shoulder_pitch > 115:
+            shoulder_pitch = 115
+        if shoulder_pitch < -117:
+            shoulder_pitch = -117
+        if shoulder_roll < -5:
+            shoulder_roll = -5
+        if shoulder_roll > 65:
+            shoulder_roll = 65
+
         # Arms motion from user have always the priority than walk arms motion
         jointnames = ["LShoulderPitch", "LShoulderRoll", "LElbowYaw", "LElbowRoll", "LWristYaw", "LHand"]
         arm1 = [shoulder_pitch, shoulder_roll, elbow_yaw, elbow_roll, wrist_yaw]

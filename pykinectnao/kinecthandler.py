@@ -101,7 +101,7 @@ class KinectHandler():
                 body = self.bodies.bodies[self.active_bodies_indices[j]]
                 self.positions = body.joints
                 self.orientations = body.joint_orientations
-                res.append([self.compute_positions_diff(), self.convert_orientation()])
+                res.append([self.convert_positions(), self.convert_orientation()])
             return res
         else:
             return NO_DATA
@@ -133,13 +133,13 @@ class KinectHandler():
             tab[0] = self.compute_yaw(joints_map[joint])
             tab[1] = self.compute_pitch(joints_map[joint])
             tab[2] = self.compute_roll(joints_map[joint])
-        #     index = joints_map[joint]
-        #     x = self.orientations[index].Orientation.x
-        #     y = self.orientations[index].Orientation.y
-        #     z = self.orientations[index].Orientation.z
-        #     w = self.orientations[index].Orientation.w
-        #     tab = transformations.euler_from_quaternion([w,x,y,z], "szyx")
-        #     tab = map(lambda x: x/pi*180., tab)
+            # index = joints_map[joint]
+            # x = self.orientations[index].Orientation.x
+            # y = self.orientations[index].Orientation.y
+            # z = self.orientations[index].Orientation.z
+            # w = self.orientations[index].Orientation.w
+            # tab = transformations.quaternion_matrix([w, x, y, z])
+            # tab = map(lambda x: x/pi*180., tab)
             orientations[joints_map[joint]] = tab
         return orientations
 
@@ -167,26 +167,24 @@ class KinectHandler():
         roll = atan2(2 * ((x * y) + (w * z)), 1-2*((y*y)+(z*z))) / pi * 180.0
         return roll
 
-    def compute_positions_diff(self):
-        global last_positions
-        positions = self.convert_positions()
-        positions_diff = self.positions_pattern_list[:]
-        for joint in joints_map.keys():
-            positions_diff[joints_map[joint]] = \
-                [positions[joints_map[joint]][0] - last_positions[joints_map[joint]][0],
-                 positions[joints_map[joint]][1] - last_positions[joints_map[joint]][1],
-                 positions[joints_map[joint]][2] - last_positions[joints_map[joint]][2]]
-        last_positions = positions
-        return positions_diff
-
-
+    # def compute_positions_diff(self):
+    #     global last_positions
+    #     positions = self.convert_positions()
+    #     positions_diff = self.positions_pattern_list[:]
+    #     for joint in joints_map.keys():
+    #         positions_diff[joints_map[joint]] = \
+    #             [positions[joints_map[joint]][0] - last_positions[joints_map[joint]][0],
+    #              positions[joints_map[joint]][1] - last_positions[joints_map[joint]][1],
+    #              positions[joints_map[joint]][2] - last_positions[joints_map[joint]][2]]
+    #     last_positions = positions
+    #     return positions_diff
 
     def convert_positions(self):
         positions = self.positions_pattern_list[:]
         for joint in joints_map.keys():
-            x = self.positions[joints_map[joint]].Position.X
-            y = self.positions[joints_map[joint]].Position.Y
-            z = self.positions[joints_map[joint]].Position.Z
+            x = self.positions[joints_map[joint]].Position.x
+            y = self.positions[joints_map[joint]].Position.y
+            z = self.positions[joints_map[joint]].Position.z
             positions[joints_map[joint]] = [x, y, z]
         return positions
 
