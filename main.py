@@ -33,7 +33,7 @@ objects = {"kinecthandler": kinecthandler.KinectHandler,
 
 def kinect_test(kinect_h, nao_c):
     # first = True
-    for joint in naocommander.motors_needed.keys():
+    for joint in kinecthandler.joints_map.keys():
         smoothing_dict[joint] = [deque(), deque(), deque()]
         last_movements[joint] = []
     j = 0
@@ -49,8 +49,11 @@ def kinect_test(kinect_h, nao_c):
         for i in range(nb_of_body):
             # res[i] = convert_motors(res[i], kinect_h, "kinecthandler", "naocommander")
             #
-            converted = value_filter(joints.ELBOW_RIGHT, convert_shoulder_right(res[i][0], res[i][1]))
-            nao_c.user_right_arm_articular(shoulder_pitch=converted[1],shoulder_roll=converted[0],pfractionmaxspeed=0.5)
+            converted = convert_shoulder_right(res[i][0], res[i][1])
+            # print converted
+            nao_c.user_right_arm_articular(shoulder_pitch=converted[1],shoulder_roll=converted[0],pfractionmaxspeed=0.7)
+            converted = convert_shoulder_left(res[i][0], res[i][1])
+            nao_c.user_left_arm_articular(shoulder_pitch=converted[1],shoulder_roll=converted[0],pfractionmaxspeed=0.7)
             # print res[i][0][kinecthandler.joints_map[joints.ELBOW_RIGHT]]
             # sleep(0.5)
 
@@ -87,42 +90,42 @@ def valid_angle(value):
     return value
 
 
-def convert_motors(results, device, sensor, avatar, must_filter=True):
-    convert_tab = modules[avatar].motors_converters[sensor]
-    if len(convert_tab) > 0:
-        motors_needed = modules[avatar].motors_needed
-        for joint in motors_needed.keys():
-            if joint in convert_tab.keys():
-                tab = results[kinecthandler.joints_map[joints.ELBOW_RIGHT]]
-                if joint in last_movements.keys() and len(last_movements[joint]) != 0:
-                    # if joint not tracked properly
-                    if device.positions[joint].TrackingState == PyKinectV2.TrackingState_NotTracked or \
-                                    device.positions[joint].TrackingState == PyKinectV2.TrackingState_Inferred:
-                        results[motors_needed[joint][0]] = last_movements[joint]
-                        continue
-                for i in range(3):
-                    if motors_needed[joint][1][i]:
-                        tab[i] = convert_tab[joint][i][0] * tab[i]
-                        tab[i] = convert_tab[joint][i][1] + tab[i]
-                        tab[i] = valid_angle(tab[i])
-                        # If the X axis is inverted
-                        if convert_tab[joint][i][2] == "-":
-                            c = cmath.rect(1, tab[i] / 180. * cmath.pi)
-                            c = complex(-1 * c.real, c.imag)
-                            tab[i] = round(cmath.phase(c) / cmath.pi * 180, 1)
-                        # If the Y axis is inverted
-                        if convert_tab[joint][i][3] == "-":
-                            c = cmath.rect(1, tab[i] / 180. * cmath.pi)
-                            c = c.conjugate()
-                            tab[i] = round(cmath.phase(c) / cmath.pi * 180, 1)
-                        if must_filter:
-                            if len(smoothing_dict[joint][i]) == FILTER_SIZE:
-                                smoothing_dict[joint][i].popleft()
-                            smoothing_dict[joint][i].append(tab[i])
-                            tab[i] = utils.holt_winters_second_order_ewma \
-                                (smoothing_dict[joint][i], FILTER_SPAN, FILTER_BETA)[-1]
-                last_movements[joint] = tab
-    return results
+# def convert_motors(results, device, sensor, avatar, must_filter=True):
+#     convert_tab = modules[avatar].motors_converters[sensor]
+#     if len(convert_tab) > 0:
+#         motors_needed = modules[avatar].motors_needed
+#         for joint in motors_needed.keys():
+#             if joint in convert_tab.keys():
+#                 tab = results[kinecthandler.joints_map[joints.ELBOW_RIGHT]]
+#                 if joint in last_movements.keys() and len(last_movements[joint]) != 0:
+#                     # if joint not tracked properly
+#                     if device.positions[joint].TrackingState == PyKinectV2.TrackingState_NotTracked or \
+#                                     device.positions[joint].TrackingState == PyKinectV2.TrackingState_Inferred:
+#                         results[motors_needed[joint][0]] = last_movements[joint]
+#                         continue
+#                 for i in range(3):
+#                     if motors_needed[joint][1][i]:
+#                         tab[i] = convert_tab[joint][i][0] * tab[i]
+#                         tab[i] = convert_tab[joint][i][1] + tab[i]
+#                         tab[i] = valid_angle(tab[i])
+#                         # If the X axis is inverted
+#                         if convert_tab[joint][i][2] == "-":
+#                             c = cmath.rect(1, tab[i] / 180. * cmath.pi)
+#                             c = complex(-1 * c.real, c.imag)
+#                             tab[i] = round(cmath.phase(c) / cmath.pi * 180, 1)
+#                         # If the Y axis is inverted
+#                         if convert_tab[joint][i][3] == "-":
+#                             c = cmath.rect(1, tab[i] / 180. * cmath.pi)
+#                             c = c.conjugate()
+#                             tab[i] = round(cmath.phase(c) / cmath.pi * 180, 1)
+#                         if must_filter:
+#                             if len(smoothing_dict[joint][i]) == FILTER_SIZE:
+#                                 smoothing_dict[joint][i].popleft()
+#                             smoothing_dict[joint][i].append(tab[i])
+#                             tab[i] = utils.holt_winters_second_order_ewma \
+#                                 (smoothing_dict[joint][i], FILTER_SPAN, FILTER_BETA)[-1]
+#                 last_movements[joint] = tab
+#     return results
 
 
 def value_filter(joint, tab):
@@ -178,7 +181,7 @@ def kinect_value_test(kinect_h):
         j += 1
 
 
-def convert_shoulder_right(pos, rot):
+def convert_shoulder_right(pos, rot, must_filter=True):
     shoulder = kinecthandler.joints_map[joints.SHOULDER_RIGHT]
     hand = kinecthandler.joints_map[joints.HAND_RIGHT]
     elbow = kinecthandler.joints_map[joints.ELBOW_RIGHT]
@@ -212,7 +215,50 @@ def convert_shoulder_right(pos, rot):
         phi = - phi - 90
     if 28 > phi > -28:
         theta *= 0.2
-    return [theta, phi]
+    tab = [theta, phi]
+    if must_filter:
+        tab = value_filter(joints.ELBOW_RIGHT, tab)
+    return tab
+
+
+def convert_shoulder_left(pos, rot, must_filter=True):
+    shoulder = kinecthandler.joints_map[joints.SHOULDER_LEFT]
+    hand = kinecthandler.joints_map[joints.HAND_LEFT]
+    elbow = kinecthandler.joints_map[joints.ELBOW_LEFT]
+    roll_vector_1_x = pos[elbow][0] - pos[shoulder][0]
+    roll_vector_1_y = pos[elbow][1] - pos[shoulder][1]
+    norm1 = sqrt(roll_vector_1_x**2 + roll_vector_1_y**2)
+    roll_vector_2_x = 0
+    roll_vector_2_y = pos[elbow][1] - pos[shoulder][1]
+    norm2 = sqrt(roll_vector_2_x**2 + roll_vector_2_y**2)
+    roll_vector_1_x /= norm1
+    roll_vector_1_y /= norm1
+    roll_vector_2_x /= norm2
+    roll_vector_2_y /= norm2
+    theta= acos(roll_vector_1_x * roll_vector_2_x + roll_vector_1_y * roll_vector_2_y)*180./pi
+
+    # print rot[elbow]
+    phi = rot[elbow][1]
+    phi += 90
+    phi = valid_angle(phi)
+    c = cmath.rect(1, phi *cmath.pi / 180.)
+    c = c.conjugate()
+    phi = round(cmath.phase(c)*180 / cmath.pi, 1)
+    phi += 20
+    phi = abs(phi)
+    sign = 1
+    if pos[elbow][1] > pos[shoulder][1]:
+        sign = -1
+    phi *= sign
+    if phi<-115:
+        phi = - phi - 90
+    if 28 > phi > -28:
+        theta *= 0.2
+    tab = [theta, phi]
+    if must_filter:
+        tab = value_filter(joints.ELBOW_LEFT, tab)
+    return tab
+
 
 def nao_test(nao_c):
     i = 0
