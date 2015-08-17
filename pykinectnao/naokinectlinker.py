@@ -8,7 +8,6 @@ import utils
 
 def convert_shoulder_left(pos, rot, must_filter=True):
     shoulder = kinecthandler.joints_map[joints.SHOULDER_LEFT]
-    hand = kinecthandler.joints_map[joints.HAND_LEFT]
     elbow = kinecthandler.joints_map[joints.ELBOW_LEFT]
     roll_vector_1_x = pos[elbow][0] - pos[shoulder][0]
     roll_vector_1_y = pos[elbow][1] - pos[shoulder][1]
@@ -46,7 +45,6 @@ def convert_shoulder_left(pos, rot, must_filter=True):
 
 def convert_shoulder_right(pos, rot, must_filter=True):
     shoulder = kinecthandler.joints_map[joints.SHOULDER_RIGHT]
-    hand = kinecthandler.joints_map[joints.HAND_RIGHT]
     elbow = kinecthandler.joints_map[joints.ELBOW_RIGHT]
     roll_vector_1_x = pos[elbow][0] - pos[shoulder][0]
     roll_vector_1_y = pos[elbow][1] - pos[shoulder][1]
@@ -86,11 +84,11 @@ def convert_shoulder_right(pos, rot, must_filter=True):
 
 def convert_elbow_right(pos, rot, must_filter=True):
     shoulder = kinecthandler.joints_map[joints.SHOULDER_RIGHT]
-    hand = kinecthandler.joints_map[joints.HAND_RIGHT]
+    wrist = kinecthandler.joints_map[joints.WRIST_RIGHT]
     elbow = kinecthandler.joints_map[joints.ELBOW_RIGHT]
-    roll_vector_1_x = pos[elbow][0] - pos[hand][0]
-    roll_vector_1_y = pos[elbow][1] - pos[hand][1]
-    roll_vector_1_z = pos[elbow][2] - pos[hand][2]
+    roll_vector_1_x = pos[elbow][0] - pos[wrist][0]
+    roll_vector_1_y = pos[elbow][1] - pos[wrist][1]
+    roll_vector_1_z = pos[elbow][2] - pos[wrist][2]
     roll_vector_2_x = pos[shoulder][0] - pos[elbow][0]
     roll_vector_2_y = pos[shoulder][1] - pos[elbow][1]
     roll_vector_2_z = pos[shoulder][2] - pos[elbow][2]
@@ -105,16 +103,32 @@ def convert_elbow_right(pos, rot, must_filter=True):
     theta = acos(roll_vector_1_x * roll_vector_2_x + roll_vector_1_y * roll_vector_2_y +
                  roll_vector_1_z * roll_vector_2_z)*180./pi
     theta -= 10
-    return theta
+
+    # Invert sign if needed
+    phi = -rot[elbow][2]
+    if rot[elbow][1]<-90:
+        phi *= -1
+
+    gamma = rot[wrist][2]
+    gamma += rot[elbow][2]
+    # phi += 30
+    c = cmath.rect(1, gamma * cmath.pi / 180.)
+    c = c.conjugate()
+    gamma = round(cmath.phase(c)*180 / cmath.pi, 1)
+    gamma += 15
+    tab = [theta, phi, gamma]
+    if must_filter:
+        tab = utils.value_filter(joints.WRIST_RIGHT, tab)
+    return tab
 
 
 def convert_elbow_left(pos, rot, must_filter=True):
     shoulder = kinecthandler.joints_map[joints.SHOULDER_LEFT]
-    hand = kinecthandler.joints_map[joints.HAND_LEFT]
+    wrist = kinecthandler.joints_map[joints.WRIST_LEFT]
     elbow = kinecthandler.joints_map[joints.ELBOW_LEFT]
-    roll_vector_1_x = pos[elbow][0] - pos[hand][0]
-    roll_vector_1_y = pos[elbow][1] - pos[hand][1]
-    roll_vector_1_z = pos[elbow][2] - pos[hand][2]
+    roll_vector_1_x = pos[elbow][0] - pos[wrist][0]
+    roll_vector_1_y = pos[elbow][1] - pos[wrist][1]
+    roll_vector_1_z = pos[elbow][2] - pos[wrist][2]
     roll_vector_2_x = pos[shoulder][0] - pos[elbow][0]
     roll_vector_2_y = pos[shoulder][1] - pos[elbow][1]
     roll_vector_2_z = pos[shoulder][2] - pos[elbow][2]

@@ -26,6 +26,7 @@ class NAOCommander():
         postureproxy = ALProxy("ALRobotPosture", robotIP, PORT)
         # Wake up robot
         motionproxy.wakeUp()
+        motionproxy.setCollisionProtectionEnabled("Arms", True)
 
         self.device = motionproxy
         self.postureProxy = postureproxy
@@ -68,7 +69,7 @@ class NAOCommander():
         self.device.angleInterpolationWithSpeed(jointnames, arm0, pfractionmaxspeed)
 
     def user_right_arm_articular(self, shoulder_pitch=80.5, shoulder_roll=-6.5, elbow_yaw=80,
-                                 elbow_roll=2.5, wrist_yaw=0., hand=0.25, pfractionmaxspeed=0.6):
+                                 elbow_roll=2.5, wrist_yaw=0., hand=0.00, pfractionmaxspeed=0.6):
         if not self.device.moveIsActive():
             if shoulder_pitch > 115:
                 shoulder_pitch = 115
@@ -82,6 +83,16 @@ class NAOCommander():
                 elbow_roll = 85
             if elbow_roll < 4:
                 elbow_roll = 4
+            if elbow_yaw > 115:
+                wrist_yaw += elbow_yaw-115
+                elbow_yaw = 115
+            if elbow_yaw < -115:
+                wrist_yaw += elbow_yaw+115
+                elbow_yaw = -115
+            if wrist_yaw < -100:
+                wrist_yaw = -100
+            if wrist_yaw > 100:
+                wrist_yaw = 100
 
             # Arms motion from user have always the priority than walk arms motion
             jointnames = ["RShoulderPitch", "RShoulderRoll", "RElbowYaw", "RElbowRoll", "RWristYaw", "RHand"]
@@ -93,7 +104,7 @@ class NAOCommander():
             self.device.angleInterpolationWithSpeed(jointnames, arm1, pfractionmaxspeed)
 
     def user_left_arm_articular(self, shoulder_pitch=80, shoulder_roll=6.5, elbow_yaw=-80,
-                                    elbow_roll=-3.7, wrist_yaw=0., hand=0.25, pfractionmaxspeed=0.6):
+                                    elbow_roll=-3.7, wrist_yaw=0., hand=0.00, pfractionmaxspeed=0.6):
         if not self.device.moveIsActive():
             if shoulder_pitch > 115:
                 shoulder_pitch = 115

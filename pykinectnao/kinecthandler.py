@@ -126,19 +126,22 @@ class KinectHandler():
         return orientations
 
     # Get the Yaw from a rotation quaternion
-    def compute_yaw(self, quaternion):
+    @staticmethod
+    def compute_yaw(quaternion):
         [w, x, y, z] = quaternion
         yaw = asin(2 * ((w * y) - (x * z))) / pi * 180.0
         return yaw
 
     # Get the Pitch from a rotation quaternion
-    def compute_pitch(self, quaternion):
+    @staticmethod
+    def compute_pitch(quaternion):
         [w, x, y, z] = quaternion
         pitch = atan2(2 * ((y * z) + (w * x)), 1-2*((x*x) + (y*y))) / pi * 180.0
         return pitch
 
     # Get the Roll from a rotation quaternion
-    def compute_roll(self, quaternion):
+    @staticmethod
+    def compute_roll(quaternion):
         [w, x, y, z] = quaternion
         roll = atan2(2 * ((x * y) + (w * z)), 1-2*((y*y)+(z*z))) / pi * 180.0
         return roll

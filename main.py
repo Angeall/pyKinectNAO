@@ -6,10 +6,10 @@ import pykinectnao.kinecthandler as kinecthandler
 import pykinectnao.naocommander as naocommander
 import pykinectnao.naokinectlinker as naokinectlinker
 import pykinectnao.joints as joints
+import transformations
 
 robotIP = "192.168.2.24"
 PORT = 9559
-
 
 nb_of_body = 1
 
@@ -22,12 +22,14 @@ def kinect_test(kinect_h, nao_c):
         for i in range(nb_of_body):
             converted_shoulder = naokinectlinker.convert_shoulder_right(res[i][0], res[i][1])
             converted_elbow = naokinectlinker.convert_elbow_right(res[i][0], res[i][1])
-            nao_c.user_right_arm_articular(shoulder_pitch=converted_shoulder[1],shoulder_roll=converted_shoulder[0],
-                                           elbow_roll=converted_elbow, pfractionmaxspeed=0.8)
-            converted_shoulder = naokinectlinker.convert_shoulder_left(res[i][0], res[i][1])
-            converted_elbow = naokinectlinker.convert_elbow_left(res[i][0], res[i][1])
-            nao_c.user_left_arm_articular(shoulder_pitch=converted_shoulder[1],shoulder_roll=converted_shoulder[0],
-                                          elbow_roll=converted_elbow, pfractionmaxspeed=0.8)
+            nao_c.user_right_arm_articular(shoulder_pitch=converted_shoulder[1], shoulder_roll=converted_shoulder[0],
+                                           elbow_roll=converted_elbow[0], elbow_yaw=converted_elbow[1],
+                                           wrist_yaw=converted_elbow[2],
+                                           pfractionmaxspeed=0.8)
+            # converted_shoulder = naokinectlinker.convert_shoulder_left(res[i][0], res[i][1])
+            # converted_elbow = naokinectlinker.convert_elbow_left(res[i][0], res[i][1])
+            # nao_c.user_left_arm_articular(shoulder_pitch=converted_shoulder[1],shoulder_roll=converted_shoulder[0],
+            #                               elbow_roll=converted_elbow, pfractionmaxspeed=0.8)
 
 
 def kinect_right_shoulder_test(kinect_h):
@@ -81,23 +83,37 @@ def kinect_right_elbow_test(kinect_h):
         for i in range(nb_of_body):
             # print "Body no", i
             # print res[i][0][kinecthandler.joints_map[joints.ELBOW_RIGHT]]
-            # print naokinectlinker.convert_elbow_right(res[i][0], res[i][1])
+            # print "CONVERSION: ", naokinectlinker.convert_elbow_right(res[i][0], res[i][1])[1]
+            # print "SHOULDER: ", res[i][1][kinecthandler.joints_map[joints.SHOULDER_RIGHT]]
             print "ELBOW: ", res[i][1][kinecthandler.joints_map[joints.ELBOW_RIGHT]]
-            print "WRIST: ", res[i][1][kinecthandler.joints_map[joints.WRIST_RIGHT]]
+            print "WRIST: ", res[i][1][kinecthandler.joints_map[joints.WRIST_RIGHT]], '\n'
+            # x = kinect_h.orientations[joints.ELBOW_RIGHT].Orientation.x
+            # y = kinect_h.orientations[joints.ELBOW_RIGHT].Orientation.y
+            # z = kinect_h.orientations[joints.ELBOW_RIGHT].Orientation.z
+            # w = kinect_h.orientations[joints.ELBOW_RIGHT].Orientation.w
+            # quaternion_p = [w, x, y, z]
+            # x = kinect_h.orientations[joints.WRIST_RIGHT].Orientation.x
+            # y = kinect_h.orientations[joints.WRIST_RIGHT].Orientation.y
+            # z = kinect_h.orientations[joints.WRIST_RIGHT].Orientation.z
+            # w = kinect_h.orientations[joints.WRIST_RIGHT].Orientation.w
+            # quaternion_c = [w, x, y, z]
+            # quat = transformations.quaternion_multiply(transformations.quaternion_conjugate(quaternion_p), quaternion_c)
+            # print "ELBOW-WRIST: ", "[", kinect_h.compute_yaw(quat), ", ", kinect_h.compute_pitch(quat), ", ", \
+            #                             kinect_h.compute_roll(quat), "]", '\n'
         if j % 5 == 0:
             if j == 0:
-                print "-" * 10, "COUDE OUVERT BRAS DEVANT VERS LE CIEL POING CIEL", "-" * 10
-            if j == 5:
-                print "-" * 10, "COUDE OUVERT BRAS DEVANT VERS LE CIEL POING SOL", "-" * 10
-            if j == 10:
-                print "-" * 10, "COUDE OUVERT BRAS DEVANT VERS LE SOL", "-" * 10
-            if j == 15:
-                print "-" * 10, "COUDE FERME BRAS DEVANT VERS LE CIEL", "-" * 10
-            if j == 20:
-                print "-" * 10, "COUDE FERME LONG DU CORPS VERS CAMERA", "-" * 10
-            if j == 25:
                 print "-" * 10, "COUDE FERME BRAS DEVANT POING CONTRE POING", "-" * 10
-            if j == 30:
+            if j == 5:
+                print "-" * 10, "COUDE FERME BRAS DEVANT VERS LE CIEL", "-" * 10
+            if j == 10:
+                print "-" * 10, "COUDE FERME BRAS DEVANT VERS LE SOL", "-" * 10
+            # if j == 15:
+            #     print "-" * 10, "COUDE FERME BRAS DEVANT VERS LE CIEL", "-" * 10
+            # if j == 20:
+            #     print "-" * 10, "COUDE FERME LONG DU CORPS VERS CAMERA", "-" * 10
+            # if j == 25:
+            #     print "-" * 10, "COUDE FERME BRAS DEVANT POING CONTRE POING", "-" * 10
+            if j == 15:
                 kinect_h.device.close()
                 break
             sleep(3)
