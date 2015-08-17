@@ -131,7 +131,7 @@ HAND_TIP_RIGHT = 23
 THUMB_RIGHT = 24
 
 #  --------------------------------------------------------------------------
-#  OTHER possible joints (to be completed..)
+#  OTHER possible joints
 #  --------------------------------------------------------------------------
 #
 #      * joint between the SPINE_BASE and the SPINE_MID

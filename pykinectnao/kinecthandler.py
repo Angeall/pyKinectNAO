@@ -4,7 +4,6 @@ __author__ = 'Angeall'
 from pykinect2 import PyKinectV2
 from pykinect2 import PyKinectRuntime
 import joints
-import transformations
 from math import *
 
 NO_DATA = -1
@@ -78,6 +77,7 @@ class KinectHandler():
     def close(self):
         self.device.close()
 
+    # Get a list made of [positions (list of [x, y, z]), orientation (list of [Yaw, Pitch, Roll])]
     def get_movement(self, nb_of_body=1):
         if self.device.has_new_body_frame():
             self.bodies = self.device.get_last_body_frame()
@@ -106,79 +106,44 @@ class KinectHandler():
         else:
             return NO_DATA
 
-    # Be sure to have the proper joint_map linked with self.joint_map
-    # Be sure to have a non-empty list of positions
-    # This method match the sensor joint_map with the avatar position_needed map
-    # Override if needed
-    # def convert_positions(self):
-    #     if self.positions is None:
-    #         return []
-    #     positions = self.position_pattern_list[:]
-    #     for index in self.positions_conversion_map.keys():
-    #         positions[self.positions_conversion_map[index]] = [self.positions[index].Position.x,
-    #                                                            self.positions[index].Position.y,
-    #                                                            self.positions[index].Position.z]
-    #         return positions
-
-    # Be sure to have the proper joint_map linked with self.joint_map
-    # Be sure to have a non-empty list of orientations
-    # This method match the sensor joint_map with the avatar motors_needed map
-    # Override if needed
+    # Get the [Yaw, Pitch, Roll] from the Kinect orientation quaternion
     def convert_orientation(self):
         orientations = []
         for i in range(25):
             orientations.append(None)
         for joint in joints_map.keys():
             tab = [None, None, None]
-            tab[0] = self.compute_yaw(joints_map[joint])
-            tab[1] = self.compute_pitch(joints_map[joint])
-            tab[2] = self.compute_roll(joints_map[joint])
-            # index = joints_map[joint]
-            # x = self.orientations[index].Orientation.x
-            # y = self.orientations[index].Orientation.y
-            # z = self.orientations[index].Orientation.z
-            # w = self.orientations[index].Orientation.w
-            # tab = transformations.quaternion_matrix([w, x, y, z])
-            # tab = map(lambda x: x/pi*180., tab)
+            index = joints_map[joint]
+            x = self.orientations[index].Orientation.x
+            y = self.orientations[index].Orientation.y
+            z = self.orientations[index].Orientation.z
+            w = self.orientations[index].Orientation.w
+            quaternion = [w, x, y, z]
+            tab[0] = self.compute_yaw(quaternion)
+            tab[1] = self.compute_pitch(quaternion)
+            tab[2] = self.compute_roll(quaternion)
             orientations[joints_map[joint]] = tab
         return orientations
 
-    def compute_yaw(self, index):
-        x = self.orientations[index].Orientation.x
-        y = self.orientations[index].Orientation.y
-        z = self.orientations[index].Orientation.z
-        w = self.orientations[index].Orientation.w
+    # Get the Yaw from a rotation quaternion
+    def compute_yaw(self, quaternion):
+        [w, x, y, z] = quaternion
         yaw = asin(2 * ((w * y) - (x * z))) / pi * 180.0
         return yaw
 
-    def compute_pitch(self, index):
-        x = self.orientations[index].Orientation.x
-        y = self.orientations[index].Orientation.y
-        z = self.orientations[index].Orientation.z
-        w = self.orientations[index].Orientation.w
+    # Get the Pitch from a rotation quaternion
+    def compute_pitch(self, quaternion):
+        [w, x, y, z] = quaternion
         pitch = atan2(2 * ((y * z) + (w * x)), 1-2*((x*x) + (y*y))) / pi * 180.0
         return pitch
 
-    def compute_roll(self, index):
-        x = self.orientations[index].Orientation.x
-        y = self.orientations[index].Orientation.y
-        z = self.orientations[index].Orientation.z
-        w = self.orientations[index].Orientation.w
+    # Get the Roll from a rotation quaternion
+    def compute_roll(self, quaternion):
+        [w, x, y, z] = quaternion
         roll = atan2(2 * ((x * y) + (w * z)), 1-2*((y*y)+(z*z))) / pi * 180.0
         return roll
 
-    # def compute_positions_diff(self):
-    #     global last_positions
-    #     positions = self.convert_positions()
-    #     positions_diff = self.positions_pattern_list[:]
-    #     for joint in joints_map.keys():
-    #         positions_diff[joints_map[joint]] = \
-    #             [positions[joints_map[joint]][0] - last_positions[joints_map[joint]][0],
-    #              positions[joints_map[joint]][1] - last_positions[joints_map[joint]][1],
-    #              positions[joints_map[joint]][2] - last_positions[joints_map[joint]][2]]
-    #     last_positions = positions
-    #     return positions_diff
-
+    # Get an array [x, y, z] from the Kinect Position object
     def convert_positions(self):
         positions = self.positions_pattern_list[:]
         for joint in joints_map.keys():
