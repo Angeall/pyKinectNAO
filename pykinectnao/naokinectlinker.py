@@ -1,9 +1,48 @@
+import transformations
+
 __author__ = 'Angeall'
 import joints
 import kinecthandler
 from math import *
 import cmath
 import utils
+import numpy as np
+
+
+def right_shoulder_to_elbow(pos):
+    shoulder = kinecthandler.joints_map[joints.SHOULDER_RIGHT]
+    elbow = kinecthandler.joints_map[joints.ELBOW_RIGHT]
+    return utils.get_vector(pos[shoulder], pos[elbow])
+
+
+def left_shoulder_to_elbow(pos):
+    shoulder = kinecthandler.joints_map[joints.SHOULDER_LEFT]
+    elbow = kinecthandler.joints_map[joints.ELBOW_LEFT]
+    return utils.get_vector(pos[shoulder], pos[elbow])
+
+
+def right_shoulder_to_spine_base(pos):
+    shoulder = kinecthandler.joints_map[joints.SHOULDER_RIGHT]
+    spine_base = kinecthandler.joints_map[joints.SPINE_BASE]
+    return utils.get_vector(pos[shoulder], pos[spine_base])
+
+
+def left_shoulder_to_spine_base(pos):
+    shoulder = kinecthandler.joints_map[joints.SHOULDER_LEFT]
+    spine_base = kinecthandler.joints_map[joints.SPINE_BASE]
+    return utils.get_vector(pos[shoulder], pos[spine_base])
+
+
+def right_elbow_to_wrist(pos):
+    elbow = kinecthandler.joints_map[joints.ELBOW_RIGHT]
+    wrist = kinecthandler.joints_map[joints.WRIST_RIGHT]
+    return utils.get_vector(pos[elbow], pos[wrist])
+
+
+def left_elbow_to_wrist(pos):
+    elbow = kinecthandler.joints_map[joints.ELBOW_LEFT]
+    wrist = kinecthandler.joints_map[joints.joints.WRIST_LEFT]
+    return utils.get_vector(pos[elbow], pos[wrist])
 
 
 def convert_shoulder_left(pos, rot, must_filter=True):
@@ -104,18 +143,10 @@ def convert_elbow_right(pos, rot, must_filter=True):
                  roll_vector_1_z * roll_vector_2_z)*180./pi
     theta -= 10
 
-    # Invert sign if needed
-    phi = -rot[elbow][2]
-    if rot[elbow][1]<-90:
-        phi *= -1
+    phi = rot[elbow][2] - rot[elbow][0]
 
-    gamma = rot[wrist][2]
-    gamma += rot[elbow][2]
-    # phi += 30
-    c = cmath.rect(1, gamma * cmath.pi / 180.)
-    c = c.conjugate()
-    gamma = round(cmath.phase(c)*180 / cmath.pi, 1)
-    gamma += 15
+    gamma = 0
+
     tab = [theta, phi, gamma]
     if must_filter:
         tab = utils.value_filter(joints.WRIST_RIGHT, tab)

@@ -67,3 +67,62 @@ def valid_angle(value):
         value = 180 + (value + 180)
         return valid_angle(value)
     return value
+
+
+# coord_tab: tab of coordinates to rotate, given the angles tab
+# angles : the angles to rotate (tab must have the same length than order)
+# order: the rotation order, examples : xyx. or xy, etc...
+# return a tab with all the coord rotated
+def rotate(coord_tab, angles, order="xyz"):
+    m = []
+    for i in range(len(order)):
+        angle = angles[i]
+        if order[i] == 'x':
+            m.append(np.matrix([[1, 0, 0], [0, cos(angle), -sin(angle)], [0, sin(angle), cos(angle)]]))
+        elif order[i] == 'y':
+            m.append(np.matrix([[cos(angle), 0, sin(angle)], [0, 1, 0], [-sin(angle), 0, cos(angle)]]))
+        elif order[i] == 'z':
+            m.append(np.matrix([[cos(angle), -sin(angle), 0], [sin(angle), cos(angle), 0], [0, 0, 1]]))
+    matrix = reduce(lambda a, b: a * b, m)
+    new_coord_tab = []
+    for coord in coord_tab:
+        [x, y, z] = coord
+        vector = np.matrix([[x], [y], [z]])
+        [x, y, z] = (matrix*vector).getA()
+        new_coord_tab.append([x[0], y[0], z[0]])
+    return new_coord_tab
+
+
+def get_vector(final, start, transform=None):
+    x = final[0]-start[0]
+    y = final[1]-start[1]
+    z = final[2]-start[2]
+    if transform is None:
+        return [x, y, z]
+    else:
+        temp = transform*np.matrix([[x], [y], [z]])
+        return np.transpose(temp)
+
+
+def normalized_cross(vect1, vect2):
+    cross = np.cross(vect1, vect2)
+    return normalize(cross)
+
+
+def normalized_dot(vect1, vect2):
+    vect1 = normalize(vect1)
+    vect2 = normalize(vect2)
+    dot = np.dot(vect1, vect2)
+    return dot
+
+
+def normalize(vect):
+    return vect/np.linalg.norm(vect)
+
+
+def angle_between(vector1, vector2):
+    norm1 = np.linalg.norm(vector1)
+    norm2 = np.linalg.norm(vector2)
+    vector1 = map(lambda x: x/norm1, vector1)
+    vector2 = map(lambda x: x/norm2, vector2)
+    return acos(vector1[0] * vector2[0] + vector1[1] * vector2[1] + vector1[2] * vector2[2])*180./pi
