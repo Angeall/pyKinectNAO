@@ -68,6 +68,23 @@ class NAOCommander():
         self.device.angleInterpolationWithSpeed(jointnames, arm2, pfractionmaxspeed)
         self.device.angleInterpolationWithSpeed(jointnames, arm0, pfractionmaxspeed)
 
+    def move_robot(self, right_shoulder_pitch=80.5, right_shoulder_roll=-6.5, right_elbow_yaw=80,
+                         right_elbow_roll=2.5, right_wrist_yaw=0., right_hand=0.00,
+                         left_shoulder_pitch=80.5, left_shoulder_roll=6.5, left_elbow_yaw=-80,
+                         left_elbow_roll=-2.5, left_wrist_yaw=0., left_hand=0.00,
+                         pfractionmaxspeed=0.6):
+        jointnames = ["RShoulderPitch", "RShoulderRoll", "RElbowYaw", "RElbowRoll", "RWristYaw", "RHand",
+                      "LShoulderPitch", "LShoulderRoll", "LElbowYaw", "LElbowRoll", "LWristYaw", "LHand"]
+        movement = [right_shoulder_pitch, right_shoulder_roll, right_elbow_yaw, right_elbow_roll, right_wrist_yaw]
+        movement = [x * motion.TO_RAD for x in movement]
+        # The hand is not in degree, we need to add it after the conversion
+        movement.append(right_hand)
+        l_arm = [left_shoulder_pitch, left_shoulder_roll, left_elbow_yaw, left_elbow_roll, left_wrist_yaw]
+        l_arm = [x * motion.TO_RAD for x in l_arm]
+        l_arm.append(left_hand)
+        movement.extend(l_arm)
+        self.device.angleInterpolationWithSpeed(jointnames, movement, pfractionmaxspeed)
+
     def user_right_arm_articular(self, shoulder_pitch=80.5, shoulder_roll=-6.5, elbow_yaw=80,
                                  elbow_roll=2.5, wrist_yaw=0., hand=0.00, pfractionmaxspeed=0.6):
         if not self.device.moveIsActive():

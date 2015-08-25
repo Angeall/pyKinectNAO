@@ -80,10 +80,10 @@ def get_right_shoulder_pitch(kinect_pos, world=None):
     # Only z and y needed
     shoulder_elbow = [shoulder_elbow[2], shoulder_elbow[1]]
     shoulder_elbow = utils.normalize(shoulder_elbow)
-    sign = -1
+    sign = 1
     # If the elbow is higher than the shoulder
     if shoulder_elbow[1] < 0 or finger_tip[1] > head[1]:
-        sign = 1
+        sign = -1
     res = sign * np.arccos(np.dot(shoulder_elbow, cross)[0])
     if res > 1.79:
         res = 1.79

@@ -6,36 +6,43 @@ import cmath
 
 import pykinectnao.kinecthandler as kinecthandler
 import pykinectnao.naocommander as naocommander
-import pykinectnao.naokinectlinker as naokinectlinker
-import pykinectnao.joints as joints
-import transformations
 import pykinectnao.converter as converter
 from math import pi
+from multiprocessing import Pool
 
-# robotIP = "192.168.2.24"
-robotIP = "127.0.0.1"
-# PORT = 9559
-PORT = 18200
+robotIP = "192.168.2.24"
+# robotIP = "127.0.0.1"
+PORT = 9559
+# PORT = 18200
 nb_of_body = 1
 
 
 def kinect_test(kinect_h, nao_c):
+    p = Pool(processes=4)
     while True:
         res = kinect_h.get_movement(nb_of_body)
         if res == kinecthandler.NO_DATA:
             continue
         for i in range(nb_of_body):
-            world = converter.get_robot_world(res[i][0])
+            [r_s_roll, r_s_pitch, r_e_roll, r_e_yaw, r_w_yaw] = converter.get_right_arm(res[i][0], res[i][1])
+            [l_s_roll, l_s_pitch, l_e_roll, l_e_yaw, l_w_yaw] = converter.get_left_arm(res[i][0], res[i][1])
+            nao_c.move_robot(right_shoulder_roll=r_s_roll, right_shoulder_pitch=r_s_pitch,
+                             right_elbow_roll=r_e_roll, right_elbow_yaw=r_e_yaw,
+                             right_wrist_yaw=r_w_yaw,
+                             left_shoulder_roll=l_s_roll, left_shoulder_pitch=l_s_pitch,
+                             left_elbow_roll=l_e_roll, left_elbow_yaw=l_e_yaw,
+                             left_wrist_yaw=l_w_yaw,
+                             pfractionmaxspeed=0.7)
             # [s_roll, s_pitch, e_roll, e_yaw, w_yaw] = converter.get_right_arm(res[i][0], res[i][1])
             # nao_c.user_right_arm_articular(shoulder_pitch=s_pitch, shoulder_roll=s_roll,
             #                                elbow_roll=e_roll, elbow_yaw=e_yaw,
             #                                wrist_yaw=w_yaw,
-            #                                pfractionmaxspeed=0.8)
-            [s_roll, s_pitch, e_roll, e_yaw, w_yaw] = converter.get_left_arm(res[i][0], res[i][1])
-            nao_c.user_left_arm_articular(shoulder_pitch=s_pitch, shoulder_roll=s_roll,
-                                           elbow_roll=e_roll, elbow_yaw=e_yaw,
-                                           wrist_yaw=w_yaw,
-                                           pfractionmaxspeed=0.8)
+            #                                pfractionmaxspeed=0.6)
+            # [s_roll, s_pitch, e_roll, e_yaw, w_yaw] = converter.get_left_arm(res[i][0], res[i][1])
+            # nao_c.user_left_arm_articular(shoulder_pitch=s_pitch, shoulder_roll=s_roll,
+            #                               elbow_roll=e_roll, elbow_yaw=e_yaw,
+            #                               wrist_yaw=w_yaw,
+            #                               pfractionmaxspeed=0.6)
 
 def kinect_right_shoulder_test(kinect_h):
     j = 0
@@ -144,12 +151,9 @@ def kinect_right_elbow_test(kinect_h):
         j += 1
 
 
-def main():
+if __name__ == '__main__':
     _sensor = kinecthandler.KinectHandler()
     _avatar = naocommander.NAOCommander(robotIP, PORT)
     kinect_test(_sensor, _avatar)
     # kinect_right_shoulder_test(_sensor)
     # kinect_right_elbow_test(_sensor)
-
-
-main()
