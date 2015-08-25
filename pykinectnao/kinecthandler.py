@@ -153,6 +153,14 @@ class KinectHandler():
             x = self.positions[joints_map[joint]].Position.x
             y = self.positions[joints_map[joint]].Position.y
             z = self.positions[joints_map[joint]].Position.z
+            if joint == joints.ELBOW_RIGHT:
+                shoulder_z = self.positions[joints_map[joints.SHOULDER_RIGHT]].Position.z
+                if z > shoulder_z:
+                    z = shoulder_z
+            elif joint == joints.ELBOW_LEFT:
+                shoulder_z = self.positions[joints_map[joints.SHOULDER_LEFT]].Position.z
+                if z > shoulder_z:
+                    z = shoulder_z
             positions[joints_map[joint]] = [x, y, z]
         return positions
 

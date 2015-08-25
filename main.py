@@ -12,9 +12,10 @@ import transformations
 import pykinectnao.converter as converter
 from math import pi
 
-robotIP = "192.168.2.24"
-PORT = 9559
-
+# robotIP = "192.168.2.24"
+robotIP = "127.0.0.1"
+# PORT = 9559
+PORT = 18200
 nb_of_body = 1
 
 
@@ -24,31 +25,17 @@ def kinect_test(kinect_h, nao_c):
         if res == kinecthandler.NO_DATA:
             continue
         for i in range(nb_of_body):
-            converted_shoulder = naokinectlinker.convert_shoulder_right(res[i][0], res[i][1])
-            converted_elbow = naokinectlinker.convert_elbow_right(res[i][0], res[i][1])
             world = converter.get_robot_world(res[i][0])
-            # nao_c.user_right_arm_articular(shoulder_pitch=converted_shoulder[1], shoulder_roll=converted_shoulder[0],
-            #                                elbow_roll=converted_elbow[0], # elbow_yaw=converted_shoulder[1] + yaw[0],
-            #                                #wrist_yaw=converted_elbow[2],
+            # [s_roll, s_pitch, e_roll, e_yaw, w_yaw] = converter.get_right_arm(res[i][0], res[i][1])
+            # nao_c.user_right_arm_articular(shoulder_pitch=s_pitch, shoulder_roll=s_roll,
+            #                                elbow_roll=e_roll, elbow_yaw=e_yaw,
+            #                                wrist_yaw=w_yaw,
             #                                pfractionmaxspeed=0.8)
-            s_pitch = converter.get_right_shoulder_pitch(res[i][0], world)*180./pi
-            s_roll = converter.get_right_shoulder_roll(res[i][0], world).getA()[0][0]*180./pi
-            e_roll = converter.get_right_elbow_roll(res[i][0], world).getA()[0][0]*180./pi
-            e_yaw = converter.get_right_elbow_yaw(res[i][0],
-                                                  shoulder_roll=s_roll*pi/180.,
-                                                  shoulder_pitch=s_pitch*pi/180,
-                                                  world=world)*180./pi
-            # print s_pitch, " ", s_roll, " ", e_roll
-            nao_c.user_right_arm_articular(shoulder_pitch=s_pitch, shoulder_roll=s_roll,
-                                           elbow_roll=e_roll, elbow_yaw=s_pitch + e_yaw,
-                                           #wrist_yaw=converted_elbow[2],
-                                           pfractionmaxspeed=0.6)
-            # print "MOVED"
-            # converted_shoulder = naokinectlinker.convert_shoulder_left(res[i][0], res[i][1])
-            # converted_elbow = naokinectlinker.convert_elbow_left(res[i][0], res[i][1])
-            # nao_c.user_left_arm_articular(shoulder_pitch=converted_shoulder[1],shoulder_roll=converted_shoulder[0],
-            #                               elbow_roll=converted_elbow, pfractionmaxspeed=0.8)
-
+            [s_roll, s_pitch, e_roll, e_yaw, w_yaw] = converter.get_left_arm(res[i][0], res[i][1])
+            nao_c.user_left_arm_articular(shoulder_pitch=s_pitch, shoulder_roll=s_roll,
+                                           elbow_roll=e_roll, elbow_yaw=e_yaw,
+                                           wrist_yaw=w_yaw,
+                                           pfractionmaxspeed=0.8)
 
 def kinect_right_shoulder_test(kinect_h):
     j = 0
@@ -104,9 +91,18 @@ def kinect_right_elbow_test(kinect_h):
             # print "Body no", i
             # print res[i][0][kinecthandler.joints_map[joints.ELBOW_RIGHT]]
             # print naokinectlinker.convert_elbow_right(res[i][0], res[i][1], must_filter=False)[1]
-            converted_shoulder = naokinectlinker.convert_shoulder_right(res[i][0], res[i][1])
             world = converter.get_robot_world(res[i][0])
-            print converted_shoulder[1] + converter.get_right_elbow_yaw(res[i][0], world=world)*180./pi
+            s_pitch = converter.get_right_shoulder_pitch(res[i][0], world)
+            s_roll = converter.get_right_shoulder_roll(res[i][0], world)
+            e_roll = converter.get_right_elbow_roll(res[i][0], world)
+            e_yaw = converter.get_right_elbow_yaw(res[i][0],
+                                                  shoulder_pitch=s_pitch,
+                                                  shoulder_roll=s_roll,
+                                                  world=world)
+            print "E_YAW", e_yaw*180./pi
+            print "S_PITCH", s_pitch*180./pi
+            print "S_ROLL", s_roll*180./pi
+            print ""
             # print "SHOULDER: ", res[i][1][kinecthandler.joints_map[joints.SHOULDER_RIGHT]]
             # print "ELBOW: ", res[i][1][kinecthandler.joints_map[joints.ELBOW_RIGHT]]
             # print "WRIST: ", res[i][1][kinecthandler.joints_map[joints.WRIST_RIGHT]], '\n'

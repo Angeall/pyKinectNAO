@@ -84,10 +84,8 @@ class NAOCommander():
             if elbow_roll < 4:
                 elbow_roll = 4
             if elbow_yaw > 115:
-                wrist_yaw += elbow_yaw-115
                 elbow_yaw = 115
             if elbow_yaw < -115:
-                wrist_yaw += elbow_yaw+115
                 elbow_yaw = -115
             if wrist_yaw < -100:
                 wrist_yaw = -100
@@ -118,6 +116,14 @@ class NAOCommander():
                 elbow_roll = -85
             if elbow_roll > -4:
                 elbow_roll = -4
+            if elbow_yaw > 115:
+                elbow_yaw = 115
+            if elbow_yaw < -115:
+                elbow_yaw = -115
+            if wrist_yaw < -100:
+                wrist_yaw = -100
+            if wrist_yaw > 100:
+                wrist_yaw = 100
 
             # Arms motion from user have always the priority than walk arms motion
             jointnames = ["LShoulderPitch", "LShoulderRoll", "LElbowYaw", "LElbowRoll", "LWristYaw", "LHand"]

@@ -101,7 +101,7 @@ def get_vector(final, start, transform=None):
         return [x, y, z]
     else:
         temp = transform*np.matrix([[x], [y], [z]])
-        return np.transpose(temp)
+        return np.transpose(temp)[0].getA()[0]
 
 
 def normalized_cross(vect1, vect2):
@@ -117,7 +117,8 @@ def normalized_dot(vect1, vect2):
 
 
 def normalize(vect):
-    return vect/np.linalg.norm(vect)
+    norm = np.linalg.norm(vect)
+    return map(lambda x: x/norm, vect)
 
 
 def angle_between(vector1, vector2):
