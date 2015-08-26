@@ -10,10 +10,10 @@ import pykinectnao.converter as converter
 from math import pi
 from multiprocessing import Pool
 
-robotIP = "192.168.2.24"
-# robotIP = "127.0.0.1"
-PORT = 9559
-# PORT = 18200
+# robotIP = "192.168.2.24"
+robotIP = "127.0.0.1"
+# PORT = 9559
+PORT = 2672
 nb_of_body = 1
 
 

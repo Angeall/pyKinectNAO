@@ -41,7 +41,10 @@ def get_right_elbow_roll(kinect_pos, world=None):
     wrist = kinect_pos[kinecthandler.joints_map[joints.WRIST_RIGHT]]
     shoulder_elbow = utils.get_vector(elbow, shoulder, transform=world[0])
     elbow_wrist = utils.get_vector(wrist, elbow, transform=world[0])
-    return np.arccos(utils.normalized_dot(shoulder_elbow, elbow_wrist))
+    res = np.arccos(utils.normalized_dot(shoulder_elbow, elbow_wrist))
+    res = max(res, 0.069)
+    res = min(res, 1.483)
+    return res
 
 
 def get_left_elbow_roll(kinect_pos, world=None):
@@ -52,7 +55,10 @@ def get_left_elbow_roll(kinect_pos, world=None):
     wrist = kinect_pos[kinecthandler.joints_map[joints.WRIST_LEFT]]
     shoulder_elbow = utils.get_vector(elbow, shoulder, transform=world[0])
     elbow_wrist = utils.get_vector(wrist, elbow, transform=world[0])
-    return -np.arccos(utils.normalized_dot(shoulder_elbow, elbow_wrist))
+    res = -np.arccos(utils.normalized_dot(shoulder_elbow, elbow_wrist))
+    res = min(res, -0.069)
+    res = max(res, -1.483)
+    return res
 
 
 def get_right_shoulder_pitch(kinect_pos, world=None):
@@ -64,6 +70,7 @@ def get_right_shoulder_pitch(kinect_pos, world=None):
     elbow = kinect_pos[kinecthandler.joints_map[joints.ELBOW_RIGHT]]
     finger_tip = kinect_pos[kinecthandler.joints_map[joints.HAND_TIP_RIGHT]]
     head = kinect_pos[kinecthandler.joints_map[joints.HEAD]]
+    wrist = kinect_pos[kinecthandler.joints_map[joints.WRIST_RIGHT]]
 
     shoulder_elbow = utils.get_vector(elbow, shoulder, transform=world[0])
     shoulder_elbow = utils.normalize(shoulder_elbow)
@@ -82,13 +89,11 @@ def get_right_shoulder_pitch(kinect_pos, world=None):
     shoulder_elbow = utils.normalize(shoulder_elbow)
     sign = 1
     # If the elbow is higher than the shoulder
-    if shoulder_elbow[1] < 0 or finger_tip[1] > head[1]:
+    if shoulder_elbow[1] < 0 or finger_tip[1] > head[1] or wrist[1] > shoulder[1]:
         sign = -1
     res = sign * np.arccos(np.dot(shoulder_elbow, cross)[0])
-    if res > 1.79:
-        res = 1.79
-    elif res < -1.57:
-        res = -1.57
+    res = max(res, -1.57)
+    res = min(res, 1.57)
     return res
 
 
@@ -101,6 +106,7 @@ def get_left_shoulder_pitch(kinect_pos, world=None):
     elbow = kinect_pos[kinecthandler.joints_map[joints.ELBOW_LEFT]]
     finger_tip = kinect_pos[kinecthandler.joints_map[joints.HAND_TIP_LEFT]]
     head = kinect_pos[kinecthandler.joints_map[joints.HEAD]]
+    wrist = kinect_pos[kinecthandler.joints_map[joints.WRIST_LEFT]]
 
     shoulder_elbow = utils.get_vector(elbow, shoulder, transform=world[0])
     shoulder_elbow = utils.normalize(shoulder_elbow)
@@ -119,13 +125,11 @@ def get_left_shoulder_pitch(kinect_pos, world=None):
     shoulder_elbow = utils.normalize(shoulder_elbow)
     sign = 1
     # If the elbow is higher than the shoulder
-    if shoulder_elbow[1] < 0 or finger_tip[1] > head[1]:
+    if shoulder_elbow[1] < 0 or finger_tip[1] > head[1] or wrist[1] > shoulder[1]:
         sign = -1
     res = sign * np.arccos(np.dot(shoulder_elbow, cross)[0])
-    if res > 1.79:
-        res = 1.79
-    elif res < -1.57:
-        res = -1.57
+    res = max(res, -1.57)
+    res = min(res, 1.57)
     return res
 
 
@@ -133,16 +137,12 @@ def get_right_shoulder_roll(kinect_pos, world=None):
     if world is None:
         world = get_robot_world(kinect_pos)
     cross = np.cross(world[1][1], world[1][2])
-    # norm1 = np.linalg.norm(cross)
     shoulder = kinect_pos[kinecthandler.joints_map[joints.SHOULDER_RIGHT]]
     elbow = kinect_pos[kinecthandler.joints_map[joints.ELBOW_RIGHT]]
     shoulder_elbow = utils.get_vector(elbow, shoulder, transform=world[0])
-    # norm2 = np.linalg.norm(shoulder_elbow)
     res = -1 * ((np.pi / 2.) - np.arccos(utils.normalized_dot(shoulder_elbow, cross)))
-    if res > 0.085:
-        res = 0.085
-    elif res < -1.13:
-        res = -1.13
+    res = min(res, 0.085)
+    res = max(res, -1.13)
     return res
 
 
@@ -150,16 +150,12 @@ def get_left_shoulder_roll(kinect_pos, world=None):
     if world is None:
         world = get_robot_world(kinect_pos)
     cross = np.cross(world[1][1], world[1][2])
-    # norm1 = np.linalg.norm(cross)
     shoulder = kinect_pos[kinecthandler.joints_map[joints.SHOULDER_LEFT]]
     elbow = kinect_pos[kinecthandler.joints_map[joints.ELBOW_LEFT]]
     shoulder_elbow = utils.get_vector(elbow, shoulder, transform=world[0])
-    # norm2 = np.linalg.norm(shoulder_elbow)
-    res = -1*((np.pi / 2.) - np.arccos(utils.normalized_dot(shoulder_elbow, cross)))
-    if res < -0.085:
-        res = -0.085
-    elif res > 1.13:
-        res = 1.13
+    res = -1 * ((np.pi / 2.) - np.arccos(utils.normalized_dot(shoulder_elbow, cross)))
+    res = max(res, -0.085)
+    res = min(res, 1.13)
     return res
 
 
@@ -231,8 +227,32 @@ def get_left_elbow_yaw(kinect_pos, shoulder_roll=None, shoulder_pitch=None, worl
     return sign * (np.arccos(dot))
 
 
-def get_right_arm(kinect_pos, kinect_rot):
+def get_right_wrist_yaw(kinect_rot, elbow_yaw):
+    wrist_yaw = kinect_rot[kinecthandler.joints_map[joints.WRIST_RIGHT]][2] + \
+                kinect_rot[kinecthandler.joints_map[joints.ELBOW_RIGHT]][2]
+    c = cmath.rect(1, wrist_yaw * cmath.pi / 180.)
+    c = c.conjugate()
+    wrist_yaw = round(cmath.phase(c) * 180 / cmath.pi, 1) + 30 - elbow_yaw + 80
+    wrist_yaw = min(wrist_yaw, 100)
+    wrist_yaw = max(wrist_yaw, -100)
+    return wrist_yaw
+
+
+def get_left_wrist_yaw(kinect_rot, elbow_yaw):
+    wrist_yaw = kinect_rot[kinecthandler.joints_map[joints.WRIST_LEFT]][2] + \
+                kinect_rot[kinecthandler.joints_map[joints.ELBOW_LEFT]][2]
+    # c = cmath.rect(1, wrist_yaw * cmath.pi / 180.)
+    # c = c.conjugate()
+    # wrist_yaw = round(cmath.phase(c) * 180 / cmath.pi, 1) - 30 + elbow_yaw - 80
+    wrist_yaw = min(wrist_yaw, 100)
+    wrist_yaw = max(wrist_yaw, -100)
+    return wrist_yaw
+
+
+def get_right_arm(kinect_pos, kinect_rot, must_filter=True):
+    # Get the conversion matrix and the axes in the "robot world"
     world = get_robot_world(kinect_pos)
+    # Compute the angle for every part of the arm
     shoulder_roll = get_right_shoulder_roll(kinect_pos, world=world) * 180 / np.pi
     shoulder_pitch = get_right_shoulder_pitch(kinect_pos, world=world) * 180 / np.pi
     elbow_roll = get_right_elbow_roll(kinect_pos, world=world) * 180 / np.pi
@@ -240,48 +260,71 @@ def get_right_arm(kinect_pos, kinect_rot):
                                     shoulder_pitch=shoulder_pitch * np.pi / 180,
                                     shoulder_roll=shoulder_roll * np.pi / 180,
                                     world=world) * 180 / np.pi
-    wrist = kinect_pos[kinecthandler.joints_map[joints.WRIST_RIGHT]]
-    elbow = kinect_pos[kinecthandler.joints_map[joints.ELBOW_RIGHT]]
-    vect = utils.get_vector(wrist, elbow, transform=world[0])
-    if elbow_roll > 60:
-        # if vect[1] > 0 and shoulder_roll < -40 and shoulder_pitch > 21:
-        #     shoulder_pitch = 21
-        elbow_yaw += abs(shoulder_pitch) - 15
-    # Si l'angle du coude n'est pas assez important, bras plat
+    # Is the elbow angle enough to bend it on the robot ?
+    if elbow_roll > 50:
+        elbow_yaw += shoulder_pitch
+    # Else, flat arm
     else:
         elbow_yaw = 80
         elbow_roll = 7.5
-    wrist_yaw = kinect_rot[kinecthandler.joints_map[joints.WRIST_RIGHT]][2] + \
-                kinect_rot[kinecthandler.joints_map[joints.ELBOW_RIGHT]][2]
-    c = cmath.rect(1, wrist_yaw * cmath.pi / 180.)
-    c = c.conjugate()
-    wrist_yaw = round(cmath.phase(c)*180 / cmath.pi, 1) + 30 - elbow_yaw +80
+    elbow_yaw = max(-110, elbow_yaw)
+    elbow_yaw = min(110, elbow_yaw)
+    # Compute Wrist yaw given the other angles + rotation list
+    wrist_yaw = get_right_wrist_yaw(kinect_rot, elbow_yaw)
+    if must_filter:
+        shoulder_roll = utils.value_filter("r_s_roll", shoulder_roll)
+        shoulder_pitch = utils.value_filter("r_s_pitch", shoulder_pitch)
+        elbow_roll = utils.value_filter("r_e_roll", elbow_roll)
+        elbow_yaw = utils.value_filter("r_e_yaw", elbow_yaw)
+        wrist_yaw = utils.value_filter("r_w_yaw", wrist_yaw)
     return [shoulder_roll, shoulder_pitch, elbow_roll, elbow_yaw, wrist_yaw]
 
 
-def get_left_arm(kinect_pos, kinect_rot):
+def get_left_arm(kinect_pos, kinect_rot, must_filter=True):
+    # Get the conversion matrix and the axes in the "robot world"
     world = get_robot_world(kinect_pos)
+    # Compute the angle for every part of the arm
     shoulder_roll = get_left_shoulder_roll(kinect_pos, world=world) * 180 / np.pi
     shoulder_pitch = get_left_shoulder_pitch(kinect_pos, world=world) * 180 / np.pi
     elbow_roll = get_left_elbow_roll(kinect_pos, world=world) * 180 / np.pi
     elbow_yaw = get_left_elbow_yaw(kinect_pos,
-                                    shoulder_pitch=shoulder_pitch * np.pi / 180,
-                                    shoulder_roll=shoulder_roll * np.pi / 180,
-                                    world=world) * 180 / np.pi
-    wrist = kinect_pos[kinecthandler.joints_map[joints.WRIST_LEFT]]
-    elbow = kinect_pos[kinecthandler.joints_map[joints.ELBOW_LEFT]]
-    vect = utils.get_vector(wrist, elbow, transform=world[0])
-    if elbow_roll < -60:
-        # if vect[1] > 0 and shoulder_roll < -40 and shoulder_pitch > 21:
-        #     shoulder_pitch = 21
-        elbow_yaw -= abs(shoulder_pitch) - 15
-    # Si l'angle du coude n'est pas assez important, bras plat
+                                   shoulder_pitch=shoulder_pitch * np.pi / 180,
+                                   shoulder_roll=shoulder_roll * np.pi / 180,
+                                   world=world) * 180 / np.pi
+    # Is the elbow angle enough to bend it on the robot ?
+    if elbow_roll < -50:
+        elbow_yaw -= shoulder_pitch + 15
+    # Else, flat arm
     else:
         elbow_yaw = -80
         elbow_roll = -7.5
-    wrist_yaw = kinect_rot[kinecthandler.joints_map[joints.WRIST_LEFT]][2] + \
-                kinect_rot[kinecthandler.joints_map[joints.ELBOW_LEFT]][2]
-    c = cmath.rect(1, wrist_yaw * cmath.pi / 180.)
-    c = c.conjugate()
-    wrist_yaw = round(cmath.phase(c)*180 / cmath.pi, 1) - 30 + elbow_yaw - 80
+    elbow_yaw = max(-110, elbow_yaw)
+    elbow_yaw = min(110, elbow_yaw)
+    # Compute Wrist yaw given the other angles + rotation list
+    wrist_yaw = get_left_wrist_yaw(kinect_rot, elbow_yaw)
+    if must_filter:
+        shoulder_roll = utils.value_filter("l_s_roll", shoulder_roll)
+        shoulder_pitch = utils.value_filter("l_s_pitch", shoulder_pitch)
+        elbow_roll = utils.value_filter("l_e_roll", elbow_roll)
+        elbow_yaw = utils.value_filter("l_e_yaw", elbow_yaw)
+        wrist_yaw = utils.value_filter("l_w_yaw", wrist_yaw)
     return [shoulder_roll, shoulder_pitch, elbow_roll, elbow_yaw, wrist_yaw]
+
+
+def get_right_knee_pitch(kinect_pos, world=None):
+    # TODO : Test
+    if world is None:
+        world = get_robot_world(kinect_pos)
+    hip = kinect_pos[kinecthandler.joints_map[joints.HIP_RIGHT]]
+    knee = kinect_pos[kinecthandler.joints_map[joints.KNEE_RIGHT]]
+    ankle = kinect_pos[kinecthandler.joints_map[joints.ANKLE_RIGHT]]
+    hip_knee = utils.get_vector(knee, hip, transform=world[0])
+    knee_ankle = utils.get_vector(ankle, knee, transform=world[0])
+    res = np.arccos(utils.normalized_dot(hip_knee, knee_ankle))
+    res = min(np.pi/2., res)
+    return res
+
+
+def get_right_ankle_pitch(kinect_pos, world=None):
+    # TODO : which vector to compare to ?
+    pass

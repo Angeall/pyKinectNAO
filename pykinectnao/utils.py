@@ -1,6 +1,5 @@
 import numpy as np
 from math import *
-import pykinectnao.kinecthandler as kinecthandler
 from collections import deque
 
 
@@ -20,27 +19,59 @@ def holt_winters_second_order_ewma(x, span, beta):
     return s
 
 
-last_movements = {}
-smoothing_dict = {}
+last_movements = {"r_s_pitch": 0,
+                  "r_s_roll" : 0,
+                  "r_e_roll" : 0,
+                  "r_e_yaw" : 0,
+                  "r_w_yaw" : 0,
+                  "l_s_pitch": 0,
+                  "l_s_roll": 0,
+                  "l_e_roll": 0,
+                  "l_e_yaw": 0,
+                  "l_w_yaw": 0,
+                  }
 
 FILTER_SPAN = 7
 FILTER_BETA = 0.3
 FILTER_SIZE = 15
 
-for joint in kinecthandler.joints_map.keys():
-        smoothing_dict[joint] = [deque(), deque(), deque()]
-        last_movements[joint] = []
+smoothing_dict = {"r_s_pitch": deque(),
+                  "r_s_roll" : deque(),
+                  "r_e_roll" : deque(),
+                  "r_e_yaw" : deque(),
+                  "r_w_yaw" : deque(),
+                  "l_s_pitch": deque(),
+                  "l_s_roll": deque(),
+                  "l_e_roll": deque(),
+                  "l_e_yaw": deque(),
+                  "l_w_yaw": deque(),
+                  }
 
 
-def value_filter(joint, tab):
-    for i in range(len(tab)):
-        if len(smoothing_dict[joint][i]) == FILTER_SIZE:
-            smoothing_dict[joint][i].popleft()
-        smoothing_dict[joint][i].append(tab[i])
-        tab[i] = holt_winters_second_order_ewma \
-            (smoothing_dict[joint][i], FILTER_SPAN, FILTER_BETA)[-1]
-        last_movements[joint] = tab
-    return tab
+# def value_filter(move, res):
+#     if len(smoothing_dict[move]) == FILTER_SIZE:
+#         smoothing_dict[move].popleft()
+#     smoothing_dict[move].append(res)
+#     res = holt_winters_second_order_ewma(smoothing_dict[move], FILTER_SPAN, FILTER_BETA)[-1]
+#     if abs(res-last_movements[move]) < 7:
+#         res = last_movements[move]
+#     else:
+#         last_movements[move] = res
+#     return res
+
+
+def value_filter(move, res):
+    if len(smoothing_dict[move]) == FILTER_SIZE:
+        smoothing_dict[move].popleft()
+    smoothing_dict[move].append(res)
+    res = holt_winters_second_order_ewma(smoothing_dict[move], FILTER_SPAN, FILTER_BETA)[-1]
+    if abs(res-last_movements[move]) < 7:
+        res = last_movements[move]
+    else:
+        last_movements[move] = res
+    smoothing_dict[move].pop()
+    smoothing_dict[move].append(res)
+    return res
 
 
 def quat_to_axisangle(q):
