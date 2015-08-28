@@ -8,7 +8,6 @@ import pykinectnao.kinecthandler as kinecthandler
 import pykinectnao.naocommander as naocommander
 import pykinectnao.converter as converter
 from math import pi
-from multiprocessing import Pool
 
 robotIP = "192.168.2.24"
 # robotIP = "127.0.0.1"
@@ -18,7 +17,6 @@ nb_of_body = 1
 
 
 def kinect_test(kinect_h, nao_c):
-    p = Pool(processes=4)
     while True:
         nao_c.device.waitUntilMoveIsFinished()
         res = kinect_h.get_movement(nb_of_body)
