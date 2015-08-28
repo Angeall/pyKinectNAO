@@ -305,7 +305,7 @@ def get_left_arm(kinect_pos, kinect_rot, must_filter=True):
     return [shoulder_roll, shoulder_pitch, elbow_roll, elbow_yaw, wrist_yaw]
 
 
-def get_head_pitch(kinect_pos, world=None):
+def get_head_pitch(kinect_pos, world=None, must_filter=True):
     if world is None:
         world = get_robot_world(kinect_pos)
     head = kinect_pos[kinecthandler.joints_map[joints.HEAD]]
@@ -320,13 +320,28 @@ def get_head_pitch(kinect_pos, world=None):
     res *= sign
     res = max(res, -0.66)
     res = min(res, 0.5)
+    if must_filter:
+        res = utils.value_filter("h_pitch", res)
     return res
+
+
+def get_hand_state(hand_value):
+    if hand_value == 0 or hand_value == 1 or hand_value == 3:
+        return 0.00
+    else:
+        return 0.99
 
 
 def get_head(kinect_pos):
     world = get_robot_world(kinect_pos)
     pitch = get_head_pitch(kinect_pos, world)*180./np.pi
     return pitch
+
+
+def get_hands(hands):
+    right_hand = get_hand_state(hands[0])
+    left_hand = get_hand_state(hands[1])
+    return [right_hand, left_hand]
 
 
 def get_right_knee_pitch(kinect_pos, world=None):

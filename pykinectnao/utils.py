@@ -29,6 +29,7 @@ last_movements = {"r_s_pitch": 0,
                   "l_e_roll": 0,
                   "l_e_yaw": 0,
                   "l_w_yaw": 0,
+                  "h_pitch": 0,
                   }
 
 FILTER_SPAN = 4
@@ -36,15 +37,16 @@ FILTER_BETA = 0.45
 FILTER_SIZE = 25
 
 smoothing_dict = {"r_s_pitch": deque(),
-                  "r_s_roll" : deque(),
-                  "r_e_roll" : deque(),
-                  "r_e_yaw" : deque(),
-                  "r_w_yaw" : deque(),
+                  "r_s_roll": deque(),
+                  "r_e_roll": deque(),
+                  "r_e_yaw": deque(),
+                  "r_w_yaw": deque(),
                   "l_s_pitch": deque(),
                   "l_s_roll": deque(),
                   "l_e_roll": deque(),
                   "l_e_yaw": deque(),
                   "l_w_yaw": deque(),
+                  "h_pitch": deque(),
                   }
 
 

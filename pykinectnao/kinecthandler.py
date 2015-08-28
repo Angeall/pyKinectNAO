@@ -101,7 +101,8 @@ class KinectHandler():
                 body = self.bodies.bodies[self.active_bodies_indices[j]]
                 self.positions = body.joints
                 self.orientations = body.joint_orientations
-                res.append([self.convert_positions(), self.convert_orientation()])
+                hands = [body.hand_right_state, body.hand_left_state]
+                res.append([self.convert_positions(), self.convert_orientation(), hands])
             return res
         else:
             return NO_DATA
