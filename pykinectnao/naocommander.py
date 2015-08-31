@@ -1,25 +1,7 @@
 __author__ = 'Angeall'
 
-import joints
 import motion
 from naoqi import ALProxy
-
-# Follows the avatar needs : joints.(...): (index, [Yaw, Pitch, Roll])
-motors_needed = {  # joints.SHOULDER_RIGHT: (0, [False, True, True]),}
-                   # Iinitially ELBOW_RIGHT : (1, [False, True, True]),
-                   joints.ELBOW_RIGHT: (0, [True, True, True]), }
-
-
-# joints.HAND_RIGHT: (2, [True, False, False]),
-# joints.SHOULDER_LEFT: (3, [False, True, True]),
-# joints.ELBOW_LEFT: (4, [True, False, True]),
-# joints.HAND_LEFT: (5, [True, False, False]),
-# joints.HIP_RIGHT: (6, [True, True, True]),
-# joints.KNEE_RIGHT: (7, [False, True, False]),
-# joints.FOOT_RIGHT: (8, [False, True, True]),
-# joints.HIP_LEFT: (9, [True, True, True]),
-# joints.KNEE_LEFT: (10, [False, True, False]),
-# joints.FOOT_LEFT: (11, [False, True, True])}
 
 
 class NAOCommander():
@@ -35,8 +17,6 @@ class NAOCommander():
 
     # TODO move with motors and positions
     # def move(self):
-
-
 
     def go_to_zero(self):
         self.postureProxy.goToPosture("Stand", 0.5)
