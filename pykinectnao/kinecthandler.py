@@ -107,7 +107,7 @@ class KinectHandler():
         else:
             return NO_DATA
 
-    # Get the [Yaw, Pitch, Roll] from the Kinect orientation quaternion
+    # Get the [Roll, Pitch, Yaw] from the Kinect orientation quaternion
     def convert_orientation(self):
         orientations = []
         for i in range(25):
@@ -120,15 +120,15 @@ class KinectHandler():
             z = self.orientations[index].Orientation.z
             w = self.orientations[index].Orientation.w
             quaternion = [w, x, y, z]
-            tab[0] = self.compute_yaw(quaternion)
+            tab[0] = self.compute_roll(quaternion)
             tab[1] = self.compute_pitch(quaternion)
-            tab[2] = self.compute_roll(quaternion)
+            tab[2] = self.compute_yaw(quaternion)
             orientations[joints_map[joint]] = tab
         return orientations
 
     # Get the Yaw from a rotation quaternion
     @staticmethod
-    def compute_yaw(quaternion):
+    def compute_roll(quaternion):
         [w, x, y, z] = quaternion
         yaw = asin(2 * ((w * y) - (x * z))) / pi * 180.0
         return yaw
@@ -142,7 +142,7 @@ class KinectHandler():
 
     # Get the Roll from a rotation quaternion
     @staticmethod
-    def compute_roll(quaternion):
+    def compute_yaw(quaternion):
         [w, x, y, z] = quaternion
         roll = atan2(2 * ((x * y) + (w * z)), 1-2*((y*y)+(z*z))) / pi * 180.0
         return roll

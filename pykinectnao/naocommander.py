@@ -71,7 +71,8 @@ class NAOCommander():
             l_arm.append(left_hand)
             movement.extend(l_arm)
             movement.append(head_pitch * motion.TO_RAD)
-            self.device.angleInterpolationWithSpeed(jointnames, movement, pfractionmaxspeed)
+            #self.device.angleInterpolationWithSpeed(jointnames, movement, pfractionmaxspeed)
+            self.device.setAngles(jointnames, movement, pfractionmaxspeed)
 
     def user_right_arm_articular(self, shoulder_pitch=80.5, shoulder_roll=-6.5, elbow_yaw=80,
                                  elbow_roll=2.5, wrist_yaw=0., hand=0.00, pfractionmaxspeed=0.6):
