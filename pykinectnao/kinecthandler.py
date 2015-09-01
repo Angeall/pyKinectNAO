@@ -64,7 +64,7 @@ last_positions = []
 
 class KinectHandler():
     def __init__(self):
-        self.device = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Body
+        self.device = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Body)
                                                     #| PyKinectV2.FrameSourceTypes_Color)
         self.bodies = None
         self.active_bodies_indices = []
