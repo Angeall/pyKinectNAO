@@ -77,7 +77,8 @@ def get_right_shoulder_pitch(kinect_pos, world=None):
     shoulder_spin_shoulder = utils.get_vector(spine_shoulder, shoulder, transform=world[0])
     shoulder_spin_shoulder = utils.normalize(shoulder_spin_shoulder)
     modified_spine_mid = [shoulder[0], spine_mid[1], spine_mid[2]]
-    spine_shoulder_spine_mid = utils.get_vector(modified_spine_mid, spine_shoulder, transform=world[0])
+    # spine_shoulder_spine_mid = utils.get_vector(modified_spine_mid, spine_shoulder, transform=world[0])
+    spine_shoulder_spine_mid = utils.get_vector(modified_spine_mid, shoulder, transform=world[0])
     spine_shoulder_spine_mid = utils.normalize(spine_shoulder_spine_mid)
     cross = np.cross(spine_shoulder_spine_mid, shoulder_spin_shoulder)
     cross = np.reshape(utils.normalize(cross), (3, 1))
@@ -113,7 +114,8 @@ def get_left_shoulder_pitch(kinect_pos, world=None):
     shoulder_spin_shoulder = utils.get_vector(spine_shoulder, shoulder, transform=world[0])
     shoulder_spin_shoulder = utils.normalize(shoulder_spin_shoulder)
     modified_spine_mid = [shoulder[0], spine_mid[1], spine_mid[2]]
-    spine_shoulder_spine_mid = utils.get_vector(modified_spine_mid, spine_shoulder, transform=world[0])
+    # spine_shoulder_spine_mid = utils.get_vector(modified_spine_mid, spine_shoulder, transform=world[0])
+    spine_shoulder_spine_mid = utils.get_vector(modified_spine_mid, shoulder, transform=world[0])
     spine_shoulder_spine_mid = utils.normalize(spine_shoulder_spine_mid)
     cross = np.cross(shoulder_spin_shoulder, spine_shoulder_spine_mid)
     cross = np.reshape(utils.normalize(cross), (3, 1))
@@ -236,7 +238,7 @@ def get_right_wrist_yaw(kinect_rot, elbow_yaw):
 
 
 def get_left_wrist_yaw(kinect_rot, elbow_yaw):
-    wrist_yaw = -kinect_rot[kinecthandler.joints_map[joints.WRIST_LEFT]][2]
+    wrist_yaw = -kinect_rot[kinecthandler.joints_map[joints.HAND_LEFT]][2]
     wrist_yaw -= elbow_yaw + 80
     wrist_yaw = min(wrist_yaw, 100)
     wrist_yaw = max(wrist_yaw, -100)
@@ -339,8 +341,10 @@ def get_head(kinect_pos):
 
 
 def get_hands(hands):
-    right_hand = get_hand_state(hands[0])
-    left_hand = get_hand_state(hands[1])
+    #right_hand = get_hand_state(hands[0])
+    right_hand = utils.smooth_right_hand(hands[0])
+    #left_hand = get_hand_state(hands[1])
+    left_hand = utils.smooth_left_hand(hands[1])
     return [right_hand, left_hand]
 
 

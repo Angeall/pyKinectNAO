@@ -49,6 +49,9 @@ smoothing_dict = {"r_s_pitch": deque(),
                   "h_pitch": deque(),
                   }
 
+right_hand = None
+left_hand = None
+
 
 # def value_filter(move, res):
 #     if len(smoothing_dict[move]) == FILTER_SIZE:
@@ -74,6 +77,58 @@ def value_filter(move, res):
     smoothing_dict[move].pop()
     smoothing_dict[move].append(res)
     return res
+
+
+def smooth_right_hand(hand_value):
+    threshold = 10
+    global  right_hand
+    if right_hand is None:
+        if hand_value == 0 or hand_value == 1 or hand_value == 3:
+            right_hand = (0.00, threshold)
+        else:
+            right_hand = (0.99, threshold)
+    else:
+        if hand_value == 0 or hand_value == 1:
+            return right_hand[0]
+        else:
+            if hand_value == 3:
+                hand_value = 0.00
+            else:
+                hand_value = 0.99
+            if abs(right_hand[0] - hand_value) < 0.01:
+                right_hand = (hand_value, threshold)
+            else:
+                if right_hand[1] != 0:
+                    right_hand = (right_hand[0], right_hand[1]-1)
+                else:
+                    right_hand = (hand_value, threshold)
+    return right_hand[0]
+
+
+def smooth_left_hand(hand_value):
+    threshold = 10
+    global left_hand
+    if left_hand is None:
+        if hand_value == 0 or hand_value == 1 or hand_value == 3:
+            left_hand = (0.00, threshold)
+        else:
+            left_hand = (0.99, threshold)
+    else:
+        if hand_value == 0 or hand_value == 1:
+            return left_hand[0]
+        else:
+            if hand_value == 3:
+                hand_value = 0.00
+            else:
+                hand_value = 0.99
+            if abs(left_hand[0] - hand_value) < 0.01:
+                left_hand = (hand_value, threshold)
+            else:
+                if left_hand[1] != 0:
+                    left_hand = (left_hand[0], left_hand[1]-1)
+                else:
+                    left_hand = (hand_value, threshold)
+    return left_hand[0]
 
 
 def quat_to_axisangle(q):
