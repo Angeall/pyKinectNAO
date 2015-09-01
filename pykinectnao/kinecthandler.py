@@ -77,7 +77,7 @@ class KinectHandler():
     def close(self):
         self.device.close()
 
-    # Get a list made of [positions (list of [x, y, z]), orientation (list of [Yaw, Pitch, Roll])]
+    # Get a list made of [positions (list of [x, y, z]), orientation (list of [Roll, Pitch, Yaw])]
     def get_movement(self, nb_of_body=1):
         if self.device.has_new_body_frame():
             self.bodies = self.device.get_last_body_frame()
