@@ -28,7 +28,7 @@ def kinect_test(kinect_h, nao_c):
                              left_elbow_roll=l_e_roll, left_elbow_yaw=l_e_yaw,
                              left_wrist_yaw=l_w_yaw,
                              head_pitch=h_pitch, right_hand=r_hand, left_hand=l_hand,
-                             pfractionmaxspeed=0.9)
+                             pfractionmaxspeed=0.4)
 
 
 if __name__ == '__main__':
